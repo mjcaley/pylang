@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 
-from lark import Lark
-import llvmlite.binding as llvm
-import llvmlite.ir as ir
+from lark import Lark, Visitor
+# import llvmlite.binding as llvm
+# import llvmlite.ir as ir
+
+from pylang_ast import *
+
 
 PYLANG_GRAMMAR = '''
     start: statement+
@@ -26,16 +29,36 @@ PYLANG_GRAMMAR = '''
 '''
 
 parser = Lark(PYLANG_GRAMMAR)
+program = "42 + 24;"
+tree = parser.parse(program)
+print(tree.pretty())
 
-print(parser.parse("42 + 24;"))
+class MyVisitor(Visitor):
+    def __init__(self):
+        self.ast = None
+    
+    def start(self, tree):
+        print("start rule")
+        self.ast = Start(tree)
+
+    def statement(self, tree):
+        print("statement rule")
+        self.ast = Statement(tree)
+
+    def sum_expr(self, tree):
+        print("sum_expr rule")
+        self.ast = SumExpression(tree.children[0], tree.children[2])
 
 
-llvm.initialize()
-llvm.initialize_native_target()
-llvm.initialize_native_asmprinter()
+m = MyVisitor()
+m.visit(tree)
+print(repr(m.ast))
 
-module = ir.Module()
-sum_func = ir.Function(module, ir.FunctionType(ir.IntType(32), [ir.IntType(32), ir.IntType(32)]), 'sum')
+# llvm.initialize()
+# llvm.initialize_native_target()
+# llvm.initialize_native_asmprinter()
 
-block = sum_func.append_basic_block()
-block.
+# module = ir.Module()
+# sum_func = ir.Function(module, ir.FunctionType(ir.IntType(32), [ir.IntType(32), ir.IntType(32)]), 'sum')
+
+# block = sum_func.append_basic_block()
