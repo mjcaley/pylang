@@ -1,4 +1,7 @@
-from pylang_ast import *
+#!/usr/bin/env python3
+
+from .pylang_ast import *
 
 class Interpreter:
-    pass
+    def run(self, program):
+        pass
