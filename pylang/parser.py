@@ -10,7 +10,7 @@ PYLANG_GRAMMAR = '''
     
     statement: expr ";"
     
-    ?expr:   binary_expr
+    expr:   binary_expr
     binary_expr:    _sum_expr
     _sum_expr:   _mul_expr
                 | _mul_expr (ADD_OP | SUB_OP) expr
@@ -18,10 +18,10 @@ PYLANG_GRAMMAR = '''
                 | unary_expr (MUL_OP | DIV_OP) expr
     ?unary_expr:     (NEGATIVE_OP | NOT_OP) unary_expr
                     | atom
-    _integer: INT
-    _float: DECIMAL
-    atom:   _integer
-            | _float
+    atom:   INT         -> integer
+            | DECIMAL   -> float
+            | TRUE      -> true
+            | FALSE     -> false
             | "(" expr ")"
     
     ADD_OP: "+"
@@ -33,8 +33,8 @@ PYLANG_GRAMMAR = '''
     NEGATIVE_OP: "-"
     NOT_OP: "!"
     
-    BOOL_TRUE: "true"
-    BOOL_FALSE: "false"
+    TRUE: "true"
+    FALSE: "false"
     
     NULL: "null"
     
