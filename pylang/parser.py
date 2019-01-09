@@ -11,15 +11,15 @@ PYLANG_GRAMMAR = '''
     statement: expr ";"
     
     ?expr:   binary_expr
-    binary_expr:    sum_expr
-    ?sum_expr:   mul_expr
-                | mul_expr (ADD_OP | SUB_OP) expr
-    ?mul_expr:   atom
+    binary_expr:    _sum_expr
+    _sum_expr:   _mul_expr
+                | _mul_expr (ADD_OP | SUB_OP) expr
+    _mul_expr:   atom
                 | atom (MUL_OP | DIV_OP) expr
-    ?integer: INT
-    ?float: DECIMAL
-    ?atom:   integer
-            | float
+    _integer: INT
+    _float: DECIMAL
+    atom:   _integer
+            | _float
             | "(" expr ")"
     
     ADD_OP: "+"
