@@ -2,13 +2,17 @@
 
 from pylang import parser, pylang_ast as ast
 
+
+def test_parser():
+    program = '12 + 24;'
+
 def test_ast_printer():
-    program = '''12 + 24;'''
+    program = '12 + 24;'
 
     p = parser.parser
     parse_tree = p.parse(program)
     print(parse_tree)
-    m = parser.ToAST()
+    m = ast.ToAST()
     abtract_syntax_tree = m.transform(parse_tree)
 
     a = ast.ASTPrinter()
