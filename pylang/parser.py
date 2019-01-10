@@ -5,7 +5,7 @@ from enum import Enum
 from lark import Lark, Token
 
 
-PYLANG_GRAMMAR = '''
+GRAMMAR = '''
     start: statement+
     
     statement: expr ";"
@@ -13,16 +13,19 @@ PYLANG_GRAMMAR = '''
     expr:   binary_expr
     binary_expr:    _sum_expr
     _sum_expr:   _mul_expr
-                | _mul_expr (ADD_OP | SUB_OP) expr
+                | _mul_expr ADD_OP expr
+                | _mul_expr SUB_OP expr
     _mul_expr:   unary_expr
-                | unary_expr (MUL_OP | DIV_OP) expr
-    ?unary_expr:     (NEGATIVE_OP | NOT_OP) unary_expr
+                | unary_expr MUL_OP expr
+                | unary_expr DIV_OP expr
+    ?unary_expr:    NEGATIVE_OP unary_expr
+                    | NOT_OP unary_expr
                     | atom
     atom:   INT         -> integer
             | DECIMAL   -> float
             | TRUE      -> true
             | FALSE     -> false
-            | "(" expr ")"
+            | PAREN_L expr PAREN_R
     
     ADD_OP: "+"
     SUB_OP: "-"
@@ -67,7 +70,7 @@ def float_literal(token):
 
 
 parser = Lark(
-    PYLANG_GRAMMAR,
+    GRAMMAR,
     # parser='lalr',
     # lexer_callbacks={
     #     'NUMBER': integer_literal,
