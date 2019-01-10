@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from enum import Enum
-from functools import singledispatch
 from lark import Transformer, Token
 
 
