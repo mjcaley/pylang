@@ -69,17 +69,4 @@ def float_literal(token):
     return Token.new_borrow_pos(token.type, float(token), token)
 
 
-parser = Lark(
-    GRAMMAR,
-    # parser='lalr',
-    # lexer_callbacks={
-    #     'NUMBER': integer_literal,
-    #
-    #     'ADD_OP': operator_to_enum,
-    #     'SUB_OP': operator_to_enum,
-    #     'MUL_OP': operator_to_enum,
-    #     'DIV_OP': operator_to_enum,
-    #
-    #     'ASSIGN_OP': operator_to_enum,
-    # }
-)
+parser = Lark(GRAMMAR)
