@@ -5,6 +5,16 @@ from lark import Token, Transformer, Tree, v_args
 from .parser import Operator
 
 
+class CompressAtoms(Transformer):
+    def return_first(self, tree):
+        tree.children = tree.children[0]
+
+    integer = return_first
+    float = return_first
+    true = return_first
+    false = return_first
+
+
 class OperatorToEnum(Transformer):
     def binary_expr(self, tree):
         if len(tree) > 1:
