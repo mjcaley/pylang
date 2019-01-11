@@ -8,31 +8,35 @@ from lark import Lark, Token
 GRAMMAR = '''
     start: statement+
     
-    statement: expr ";"
+    statement: _expr ";"
     
-    expr:   binary_expr
-    binary_expr:    _sum_expr
+    _expr:   binary_expr
+    ?binary_expr:    _sum_expr
     _sum_expr:   _mul_expr
-                | _mul_expr ADD_OP expr
-                | _mul_expr SUB_OP expr
+                | _mul_expr ADD_OP _expr
+                | _mul_expr SUB_OP _expr
     _mul_expr:   unary_expr
-                | unary_expr MUL_OP expr
-                | unary_expr DIV_OP expr
+                | unary_expr MUL_OP _expr
+                | unary_expr DIV_OP _expr
     ?unary_expr:    NEGATIVE_OP unary_expr
                     | NOT_OP unary_expr
-                    | atom
-    atom:   INT         -> integer
-            | DECIMAL   -> float
-            | TRUE      -> true
-            | FALSE     -> false
-            | PAREN_L expr PAREN_R
+                    | _atom
+    _atom:   integer
+            | float
+            | true
+            | false
+            | _PAREN_L _expr _PAREN_R
+    integer:    INT
+    float:      DECIMAL
+    true:   TRUE
+    false:  FALSE
     
     ADD_OP: "+"
     SUB_OP: "-"
     MUL_OP: "*"
     DIV_OP: "/"
-    PAREN_L: "("
-    PAREN_R: ")"
+    _PAREN_L: "("
+    _PAREN_R: ")"
     NEGATIVE_OP: "-"
     NOT_OP: "!"
     
