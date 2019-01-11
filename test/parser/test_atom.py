@@ -2,55 +2,44 @@
 
 import pytest
 
-from lark import Lark
-
 
 @pytest.fixture
 def atom_parser():
+    from lark import Lark
     from pylang import parser
 
-    return Lark(parser.GRAMMAR, start='atom')
+    return Lark(parser.GRAMMAR, start='_atom')
 
 
-@pytest.mark.parametrize('test_input', [
-    '4',
-    '42',
-    '424242'
+@pytest.mark.parametrize('test_input,rule_name,token_name,expected', [
+    ('true', 'true', 'TRUE', 'true'),
+    ('false', 'false', 'FALSE', 'false'),
+
+    ('4', 'integer', 'INT', '4'),
+    ('42', 'integer', 'INT', '42'),
+    ('424242', 'integer', 'INT', '424242'),
+
+    ('4.', 'float', 'DECIMAL', '4.'),
+    ('42.', 'float', 'DECIMAL', '42.'),
+    ('4.2', 'float', 'DECIMAL', '4.2'),
+    ('42.2', 'float', 'DECIMAL', '42.2'),
+    ('42.42', 'float', 'DECIMAL', '42.42'),
+
+    ('(4)', 'integer', 'INT', '4'),
+    ('(4.2)', 'float', 'DECIMAL', '4.2'),
+    ('(true)', 'true', 'TRUE', 'true'),
+    ('(false)', 'false', 'FALSE', 'false'),
 ])
-def test_atom_integer_input(atom_parser, test_input):
-    tree = atom_parser.parse(test_input)
+def test_atom(test_input, rule_name, token_name, expected, atom_parser):
+    atom_rule = atom_parser.parse(test_input)
 
-    assert tree.data == 'integer'
-    assert tree.children[0].type == 'INT'
-    assert tree.children[0].value == test_input
+    assert '_atom' == atom_rule.data
+    assert 1 == len(atom_rule.children)
 
+    false_rule = atom_rule.children[0]
+    assert rule_name == false_rule.data
+    assert 1 == len(false_rule.children)
 
-@pytest.mark.parametrize('test_input', [
-    '4.',
-    '42.',
-    '4.2',
-    '42.2',
-    '42.42'
-])
-def test_atom_float_input(atom_parser, test_input):
-    tree = atom_parser.parse(test_input)
-
-    assert tree.data == 'float'
-    assert tree.children[0].type == 'DECIMAL'
-    assert tree.children[0].value == test_input
-
-
-def test_atom_boolean_true(atom_parser):
-    tree = atom_parser.parse('true')
-
-    assert tree.data == 'true'
-    assert tree.children[0].type == 'TRUE'
-    assert tree.children[0].value == 'true'
-
-
-def test_atom_boolean_false(atom_parser):
-    tree = atom_parser.parse('false')
-
-    assert tree.data == 'false'
-    assert tree.children[0].type == 'FALSE'
-    assert tree.children[0].value == 'false'
+    false_token = false_rule.children[0]
+    assert token_name == false_token.type
+    assert expected == false_token.value
