@@ -15,12 +15,8 @@ from .interpreter_ast import (Literal, BinaryExpression, UnaryExpression,
 
 
 class Interpreter:
-    def __init__(self):
-        self.results = []
-
-    def run(self, tree):
-        for statement in tree:
-            self.results.append(self.statement(statement))
+    def run(self, statements):
+        return [self.statement(statement) for statement in statements]
 
     def statement(self, statement):
         return self.expression(statement.expression)
@@ -29,9 +25,11 @@ class Interpreter:
         if isinstance(expression, Literal):
             return expression.value
         elif isinstance(expression, BinaryExpression):
-            expression.left = self.expression(expression.left)
-            expression.right = self.expression(expression.right)
-            return expression()
+            return expression.operation(
+                self.expression(expression.left),
+                self.expression(expression.right)
+            )
         elif isinstance(expression, UnaryExpression):
-            expression.value = self.expression(expression.value)
-            return expression()
+            return expression.operation(
+                self.expression(expression.value)
+            )
