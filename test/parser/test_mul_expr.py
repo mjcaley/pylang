@@ -25,10 +25,18 @@ def test_mul_expr_binary(test_input, token_name, expected, parser):
     assert expected == mul_token.value
 
 
-def test_mul_expr_atom(parser):
-    mul_expr_rule = parser.parse('true')
+@pytest.mark.parametrize('test_input,rule_name', [
+    ('true', 'true'),
+    ('false', 'false'),
+    ('42', 'integer'),
+    ('4.2', 'float'),
+    ('(4+2)', 'binary_expr'),
+    ('!true', 'unary_expr'),
+])
+def test_mul_expr_atom(test_input, rule_name, parser):
+    mul_expr_rule = parser.parse(test_input)
     assert '_mul_expr' == mul_expr_rule.data
     assert 1 == len(mul_expr_rule.children)
 
-    atom_token = mul_expr_rule.children[0]
-    assert 'true' == atom_token.data
+    atom_rule = mul_expr_rule.children[0]
+    assert rule_name == atom_rule.data
