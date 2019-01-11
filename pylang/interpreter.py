@@ -1,58 +1,37 @@
 #!/usr/bin/env python3
 
-from lark import Token, Transformer, Tree, v_args
+from lark import Transformer
 
-from .parser import Operator
+from .interpreter_ast import (Literal, BinaryExpression, UnaryExpression,
 
+                              Integer, Float, Boolean,
 
-class CompressAtoms(Transformer):
-    def return_first(self, tree):
-        tree.children = tree.children[0]
+                              AddExpression, SubtractExpression,
+                              MultiplyExpression, DivideExpression,
 
-    integer = return_first
-    float = return_first
-    true = return_first
-    false = return_first
+                              NotExpression, NegativeExpression,
 
-
-class OperatorToEnum(Transformer):
-    def binary_expr(self, tree):
-        if len(tree) > 1:
-            tree[1] = Token.new_borrow_pos(tree[1].type, Operator(tree[1]), tree[1])
+                              Statement)
 
 
-class ToLiteral(Transformer):
-    def integer(self, tokens):
-        return Tree('integer', int(tokens[0]))
-
-    def float(self, tokens):
-        return Tree('float', float(tokens[0]))
-
-    def true(self, _):
-        return Tree('true', True)
-
-    def false(self, _):
-        return Tree('false', False)
-
-
-class TreeWalker(Transformer):
+class Interpreter:
     def __init__(self):
         self.results = []
 
-    # start
-    # statement
-    # ?expr: sum_expr
-    # ?sum_expr
-    # ?mul_expr
-    def mul_expr(self, tree):
-        if tree.data == 'NUMBER':
-            return tree.children[0]
-        elif tree.children[1].data == 'MUL_OP':
-            pass
+    def run(self, tree):
+        for statement in tree:
+            self.results.append(self.statement(statement))
 
+    def statement(self, statement):
+        return self.expression(statement.expression)
 
-    def atom(self, tree):
-        if tree.data == 'NUMBER':
-            return tree.children[0]
-        else:
-            return tree
+    def expression(self, expression):
+        if isinstance(expression, Literal):
+            return expression.value
+        elif isinstance(expression, BinaryExpression):
+            expression.left = self.expression(expression.left)
+            expression.right = self.expression(expression.right)
+            return expression()
+        elif isinstance(expression, UnaryExpression):
+            expression.value = self.expression(expression.value)
+            return expression()
