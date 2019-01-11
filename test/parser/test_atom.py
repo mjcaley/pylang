@@ -4,11 +4,11 @@ import pytest
 
 
 @pytest.fixture
-def atom_parser():
+def parser():
     from lark import Lark
-    from pylang import parser
+    from pylang.parser import GRAMMAR
 
-    return Lark(parser.GRAMMAR, start='_atom')
+    return Lark(GRAMMAR, start='_atom')
 
 
 @pytest.mark.parametrize('test_input,rule_name,token_name,expected', [
@@ -30,8 +30,8 @@ def atom_parser():
     ('(true)', 'true', 'TRUE', 'true'),
     ('(false)', 'false', 'FALSE', 'false'),
 ])
-def test_atom(test_input, rule_name, token_name, expected, atom_parser):
-    atom_rule = atom_parser.parse(test_input)
+def test_atom(test_input, rule_name, token_name, expected, parser):
+    atom_rule = parser.parse(test_input)
     assert '_atom' == atom_rule.data
     assert 1 == len(atom_rule.children)
 
