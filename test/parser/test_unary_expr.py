@@ -4,20 +4,20 @@ import pytest
 
 
 @pytest.fixture
-def unary_expr_parser():
+def parser():
     from lark import Lark
-    from pylang import parser
+    from pylang.parser import GRAMMAR
 
-    return Lark(parser.GRAMMAR, start='unary_expr')
+    return Lark(GRAMMAR, start='unary_expr')
 
 
-@pytest.mark.parametrize('test_input,rule_name,token_name,expected', [
-    ('!true', 'unary_expr', 'NOT_OP', '!'),
-    ('-1', 'unary_expr', 'NEGATIVE_OP', '-')
+@pytest.mark.parametrize('test_input,token_name,expected', [
+    ('!true', 'NOT_OP', '!'),
+    ('-1', 'NEGATIVE_OP', '-')
 ])
-def test_unary_expr(test_input, rule_name, token_name, expected, unary_expr_parser):
-    unary_expr_rule = unary_expr_parser.parse(test_input)
-    assert rule_name == unary_expr_rule.data
+def test_unary_expr(test_input, token_name, expected, parser):
+    unary_expr_rule = parser.parse(test_input)
+    assert 'unary_expr' == unary_expr_rule.data
     assert 2 == len(unary_expr_rule.children)
 
     not_token = unary_expr_rule.children[0]
