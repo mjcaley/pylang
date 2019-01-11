@@ -23,3 +23,15 @@ def test_unary_expr(test_input, token_name, expected, parser):
     not_token = unary_expr_rule.children[0]
     assert token_name == not_token.type
     assert expected == not_token.value
+
+
+@pytest.mark.parametrize('test_input,rule_name', [
+    ('true', 'true'),
+    ('false', 'false'),
+    ('42', 'integer'),
+    ('4.2', 'float'),
+    ('(4+2)', 'binary_expr'),
+])
+def test_unary_expr_atom(test_input, rule_name, parser):
+    unary_expr_rule = parser.parse(test_input)
+    assert rule_name == unary_expr_rule.data
