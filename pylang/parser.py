@@ -12,10 +12,10 @@ GRAMMAR = '''
     
     _expr:   binary_expr
     ?binary_expr:    _sum_expr
-    _sum_expr:   _mul_expr
-                | _mul_expr ADD_OP _expr
-                | _mul_expr SUB_OP _expr
-    _mul_expr:   unary_expr
+    _sum_expr:   _prod_expr
+                | _prod_expr ADD_OP _expr
+                | _prod_expr SUB_OP _expr
+    _prod_expr:   unary_expr
                 | unary_expr MUL_OP _expr
                 | unary_expr DIV_OP _expr
     ?unary_expr:    NEGATIVE_OP unary_expr
