@@ -1,17 +1,6 @@
 #!/usr/bin/env python3
 
-from lark import Transformer
-
-from .interpreter_ast import (Literal, BinaryExpression, UnaryExpression,
-
-                              Integer, Float, Boolean,
-
-                              AddExpression, SubtractExpression,
-                              MultiplyExpression, DivideExpression,
-
-                              NotExpression, NegativeExpression,
-
-                              Statement)
+from .interpreter_ast import Literal, BinaryExpression, UnaryExpression
 
 
 class Interpreter:
