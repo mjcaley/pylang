@@ -3,20 +3,12 @@
 import pytest
 
 
-@pytest.fixture
-def parser():
-    from lark import Lark
-    from pylang.parser import GRAMMAR
-
-    return Lark(GRAMMAR, start='_sum_expr')
-
-
 @pytest.mark.parametrize('test_input,token_name,expected', [
     ('4+2', 'ADD_OP', '+'),
     ('4-2', 'SUB_OP', '-'),
 ])
 def test_sum_expr_binary(test_input, token_name, expected, parser):
-    sum_expr_rule = parser.parse(test_input)
+    sum_expr_rule = parser('_sum_expr').parse(test_input)
     assert '_sum_expr' == sum_expr_rule.data
     assert 3 == len(sum_expr_rule.children)
 
@@ -26,15 +18,15 @@ def test_sum_expr_binary(test_input, token_name, expected, parser):
 
 
 @pytest.mark.parametrize('test_input,rule_name', [
-    ('true', 'true'),
-    ('false', 'false'),
+    ('true', 'bool'),
+    ('false', 'bool'),
     ('42', 'integer'),
     ('4.2', 'float'),
     ('(4+2)', 'binary_expr'),
     ('!true', 'unary_expr'),
 ])
 def test_sum_expr_atom(test_input, rule_name, parser):
-    sum_expr_rule = parser.parse(test_input)
+    sum_expr_rule = parser('_sum_expr').parse(test_input)
     assert '_sum_expr' == sum_expr_rule.data
     assert 1 == len(sum_expr_rule.children)
 
@@ -47,7 +39,7 @@ def test_sum_expr_atom(test_input, rule_name, parser):
     ('4/2', 'DIV_OP'),
 ])
 def test_sum_expr_product(test_input, token_name, parser):
-    sum_expr_rule = parser.parse(test_input)
+    sum_expr_rule = parser('_sum_expr').parse(test_input)
     assert '_sum_expr' == sum_expr_rule.data
     assert 3 == len(sum_expr_rule.children)
     assert token_name == sum_expr_rule.children[1].type

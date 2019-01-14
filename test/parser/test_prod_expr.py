@@ -3,20 +3,12 @@
 import pytest
 
 
-@pytest.fixture
-def parser():
-    from lark import Lark
-    from pylang.parser import GRAMMAR
-
-    return Lark(GRAMMAR, start='_prod_expr')
-
-
 @pytest.mark.parametrize('test_input,token_name,expected', [
     ('4*2', 'MUL_OP', '*'),
     ('4/2', 'DIV_OP', '/'),
 ])
 def test_prod_expr_binary(test_input, token_name, expected, parser):
-    prod_expr_rule = parser.parse(test_input)
+    prod_expr_rule = parser('_prod_expr').parse(test_input)
     assert '_prod_expr' == prod_expr_rule.data
     assert 3 == len(prod_expr_rule.children)
 
@@ -26,15 +18,15 @@ def test_prod_expr_binary(test_input, token_name, expected, parser):
 
 
 @pytest.mark.parametrize('test_input,rule_name', [
-    ('true', 'true'),
-    ('false', 'false'),
+    ('true', 'bool'),
+    ('false', 'bool'),
     ('42', 'integer'),
     ('4.2', 'float'),
     ('(4+2)', 'binary_expr'),
     ('!true', 'unary_expr'),
 ])
 def test_prod_expr_atom(test_input, rule_name, parser):
-    prod_expr_rule = parser.parse(test_input)
+    prod_expr_rule = parser('_prod_expr').parse(test_input)
     assert '_prod_expr' == prod_expr_rule.data
     assert 1 == len(prod_expr_rule.children)
 

@@ -3,17 +3,9 @@
 import pytest
 
 
-@pytest.fixture
-def parser():
-    from lark import Lark
-    from pylang.parser import GRAMMAR
-
-    return Lark(GRAMMAR, start='_atom')
-
-
 @pytest.mark.parametrize('test_input,rule_name,token_name,expected', [
-    ('true', 'true', 'TRUE', 'true'),
-    ('false', 'false', 'FALSE', 'false'),
+    ('true', 'bool', 'TRUE', 'true'),
+    ('false', 'bool', 'FALSE', 'false'),
 
     ('4', 'integer', 'INT', '4'),
     ('42', 'integer', 'INT', '42'),
@@ -27,18 +19,36 @@ def parser():
 
     ('(4)', 'integer', 'INT', '4'),
     ('(4.2)', 'float', 'DECIMAL', '4.2'),
-    ('(true)', 'true', 'TRUE', 'true'),
-    ('(false)', 'false', 'FALSE', 'false'),
+    ('(true)', 'bool', 'TRUE', 'true'),
+    ('(false)', 'bool', 'FALSE', 'false'),
 ])
 def test_atom(test_input, rule_name, token_name, expected, parser):
-    atom_rule = parser.parse(test_input)
-    assert '_atom' == atom_rule.data
+    atom_rule = parser('atom').parse(test_input)
+    assert rule_name == atom_rule.data
     assert 1 == len(atom_rule.children)
 
-    false_rule = atom_rule.children[0]
-    assert rule_name == false_rule.data
-    assert 1 == len(false_rule.children)
+    atom_token = atom_rule.children[0]
+    assert token_name == atom_token.type
+    assert expected == atom_token.value
 
-    false_token = false_rule.children[0]
-    assert token_name == false_token.type
-    assert expected == false_token.value
+
+
+# @pytest.mark.parametrize('test_input,rule_name,token_name,expected', [
+#     ('(4)', 'integer', 'INT', '4'),
+#     ('(4.2)', 'float', 'DECIMAL', '4.2'),
+#     ('(true)', 'bool', 'TRUE', 'true'),
+#     ('(false)', 'bool', 'FALSE', 'false'),
+# ])
+# def test_atom(test_input, rule_name, token_name, expected, parser):
+#     atom_rule = parser('atom').parse(test_input)
+#     assert 'atom' == atom_rule.data
+#     assert 1 == len(atom_rule.children)
+#
+#     expr_rule = atom_rule.children[0]
+#     assert rule_name == expr_rule.data
+#     assert 1 == len(expr_rule.children)
+#
+#     atom_token = expr_rule.children[0]
+#     assert token_name == atom_token.type
+#     assert expected == atom_token.value
+
