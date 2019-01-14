@@ -23,6 +23,12 @@ class Boolean(Literal):
         super().__init__(True if value == 'true' else False)
 
 
+# TODO: Identfier isn't a literal
+class Identifier(Literal):
+    def __init__(self, value):
+        super().__init__(value)
+
+
 class Expression:
     def __call__(self):
         raise NotImplementedError
@@ -56,6 +62,11 @@ class MultiplyExpression(BinaryExpression):
 class DivideExpression(BinaryExpression):
     def __init__(self, left, right):
         super().__init__(left, right, lambda l, r: l / r)
+
+
+class AssignmentExpression(BinaryExpression):
+    def __init__(self, left, right):
+        super().__init__(left, right, None)
 
 
 class UnaryExpression(Expression):
@@ -95,6 +106,9 @@ class ToAST(Transformer):
     def false(self, children):
         return Boolean(children[0].value)
 
+    def identifier(self, children):
+        return Identifier(children[0].value)
+
     def binary_expr(self, children):
         if len(children) > 1:
             if children[1].type == 'MUL_OP':
@@ -105,6 +119,8 @@ class ToAST(Transformer):
                 return AddExpression(children[0], children[2])
             elif children[1].type == 'SUB_OP':
                 return SubtractExpression(children[0], children[2])
+            elif children[1].type == 'ASSIGN_OP':
+                return AssignmentExpression(children[0], children[2])
         else:
             return children
 
