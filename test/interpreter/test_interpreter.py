@@ -96,7 +96,7 @@ def test_binary_expr_assignment(interpreter):
 
 
 def test_statement(interpreter, parser):
-    p = parser()
+    p = parser('statement')
     interpreter.visit(p.parse('a=42;'))
 
     assert 0 == len(interpreter.stack)
