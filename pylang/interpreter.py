@@ -43,16 +43,16 @@ class Interpreter(Visitor):
     @v_args(tree=True)
     def unary_expr(self, tree):
         print('unary_expr', tree)
-        if tree.children[1] == 'NEGATIVE_OP':
+        if tree.children[0].type == 'NEGATIVE_OP':
             val = self.stack.pop()
             val *= -1
             self.stack.append(val)
-        elif tree.children[1] == 'NOT_OP':
+        elif tree.children[0].type == 'NOT_OP':
             val = self.stack.pop()
             val = not val
             self.stack.append(val)
         else:
-            raise SyntaxError(f'{str(tree.children[1])} is not a supported unary operator')
+            raise SyntaxError(f'{str(tree.children[0])} is not a supported unary operator')
 
     @v_args(tree=True)
     def integer(self, tree):
