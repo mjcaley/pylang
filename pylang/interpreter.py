@@ -3,14 +3,31 @@
 from lark import Visitor, v_args
 
 
-class Interpreter(Visitor):
+class MapFunctions(Visitor):
     def __init__(self):
-        self.stack = []
-        self.map = {}
+        self.function_map = dict()
+
+    @v_args(tree=True)
+    def function(self, tree):
+        self.function_map[self._function_name(tree.children[0])] = tree
+
+    def _function_name(self, function_tree):
+        return str(function_tree.children[0])
+
+
+class Interpreter(Visitor):
+    def __init__(self, function_map, entry='main'):
+        self.entry = entry
+        self.function_map = function_map
+        self.stack = list()
+        self.map = dict()
 
     def reset(self):
         self.stack.clear()
         self.map.clear()
+
+    def run(self):
+        self.visit(self.function_map[self.entry])
 
     @v_args(tree=True)
     def start(self, tree):
@@ -53,6 +70,9 @@ class Interpreter(Visitor):
             self.stack.append(val)
         else:
             raise SyntaxError(f'{str(tree.children[0])} is not a supported unary operator')
+
+    def call(self, tree):
+        self.visit(self.function_map[tree.children[0].children[0]])
 
     @v_args(tree=True)
     def integer(self, tree):
