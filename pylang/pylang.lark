@@ -19,10 +19,12 @@ _prod_expr: unary_expr
             | unary_expr DIV_OP _expr
 ?unary_expr:    NEGATIVE_OP unary_expr
                 | NOT_OP unary_expr
-                | call
-!?call: atom (  _PAREN_L call_arguments? _PAREN_R
-                | "." identifier )*
-call_arguments: _expr ( "," _expr )*
+                | attribute
+?attribute: call "." _expr
+            | call
+?call:  atom call_arguments
+        | atom
+call_arguments: _PAREN_L (_expr ( "," _expr )*)? _PAREN_R
 
 integer: INT
 float: DECIMAL
