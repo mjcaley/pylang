@@ -14,8 +14,7 @@ class TokenType(Enum):
 
     Newline = auto()
 
-    Integer = auto()
-    Float = auto()
+    Digit = auto()
     String = auto()
 
     Identifier = auto()
@@ -26,6 +25,9 @@ class TokenType(Enum):
     If = auto()
     While = auto()
     ForEach = auto()
+
+    # Operators
+    Dot = auto()
 
     LParen = auto()
     RParen = auto()
@@ -100,8 +102,8 @@ class Lexer:
         self.increment_position()
         self.next = self.data.read(1)
 
-    def set_token(self, token_type):
-        self.next_token = Token(token_type, self.start_pos, self.end_pos, self.current)
+    def set_token(self, token_type, cast_func=str):
+        self.next_token = Token(token_type, self.start_pos, self.end_pos, cast_func(self.current))
         self.discard_current()
 
     def newline(self):
@@ -130,6 +132,11 @@ class Lexer:
             self.set_token(TokenType.Newline)
             self.discard_current()
             self.newline()
+        elif self.current in digits:
+            while self.next in digits:
+                self.append_to_current()
+            self.set_token(TokenType.Digit, int)
+            self.discard_current()
         else:
             raise LexerException(self)
 
