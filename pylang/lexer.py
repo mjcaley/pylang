@@ -30,6 +30,8 @@ class TokenType(Enum):
     And = auto()                    # and
     Not = auto()                    # not
     Or = auto()                     # or
+    True_ = auto()                  # true
+    False_ = auto()                 # false
 
     # Operators
     Dot = auto()                    # .
@@ -100,7 +102,7 @@ emit token, emits newline
 
 SKIP = [
         # ASCII whitespace characters
-        '\t', '\n', '\v', '\f', '\r', ' ',
+        '\v', '\f', ' ',
 
         # Unicode whitespace
         '\u0085', '\u00a0', '\u1680', '\u2000', '\u2001', '\u2002', '\u2003', '\u2004', '\u2005', '\u2006', '\u2007',
@@ -111,7 +113,7 @@ SKIP = [
 NEWLINE = ['\n', '\r']
 INDENT = ['\t', ' ']
 ARITHMETIC_CHARACTERS = ['+', '-', '/', '*', '%', '^']
-RESERVED_CHARACTERS = ['!', '=', '<', '>', '.', ':'] + ARITHMETIC_CHARACTERS + SKIP
+RESERVED_CHARACTERS = ['!', '=', '<', '>', '.', ':'] + ARITHMETIC_CHARACTERS + INDENT + NEWLINE + SKIP
 
 
 class LexerException(Exception):
@@ -251,7 +253,33 @@ class Lexer:
         elif self.current:
             while self.next and self.next not in RESERVED_CHARACTERS:
                 self.append_to_current()
-            self.set_token(TokenType.Identifier)
+
+            if self.current == 'func':
+                self.set_token(TokenType.Function)
+            elif self.current == 'struct':
+                self.set_token(TokenType.Struct)
+            elif self.current == 'if':
+                self.set_token(TokenType.If)
+            elif self.current == 'elif':
+                self.set_token(TokenType.ElseIf)
+            elif self.current == 'else':
+                self.set_token(TokenType.Else)
+            elif self.current == 'while':
+                self.set_token(TokenType.While)
+            elif self.current == 'for':
+                self.set_token(TokenType.ForEach)
+            elif self.current == 'and':
+                self.set_token(TokenType.And)
+            elif self.current == 'or':
+                self.set_token(TokenType.Or)
+            elif self.current == 'not':
+                self.set_token(TokenType.Not)
+            elif self.current == 'true':
+                self.set_token(TokenType.True_)
+            elif self.current == 'false':
+                self.set_token(TokenType.False_)
+            else:
+                self.set_token(TokenType.Identifier)
         else:
             raise LexerException(self)
 
