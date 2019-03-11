@@ -29,6 +29,7 @@ class TokenType(Enum):
     # Operators
     Dot = auto()                    # .
     Assignment = auto()             # =
+    Not = auto()                    # !
 
     # Comparison operators
     Equal = auto()                  # ==
@@ -91,6 +92,7 @@ SKIP = [
         '\u180e', '\u200b', '\u200c', '\u200d', '\u2060', '\ufeff']
 NEWLINE = ['\n', '\r']
 INDENT = ['\t', ' ']
+RESERVED_CHARACTERS = ['!', '=', '<', '>', '.', ':'] + SKIP
 
 
 class LexerException(Exception):
@@ -167,6 +169,44 @@ class Lexer:
             self.discard_current()
         elif self.current == '.':
             self.set_token(TokenType.Dot)
+            self.discard_current()
+        elif self.current == '=':
+            if self.next == '=':
+                self.append_to_current()
+                self.set_token(TokenType.Equal)
+                self.discard_current()
+            else:
+                self.set_token(TokenType.Assignment)
+                self.discard_current()
+        elif self.current == '!':
+            if self.next == '=':
+                self.append_to_current()
+                self.set_token(TokenType.NotEqual)
+                self.discard_current()
+            else:
+                self.set_token(TokenType.Not)
+                self.discard_current()
+        elif self.current == '>':
+            if self.next == '=':
+                self.append_to_current()
+                self.set_token(TokenType.GreaterThanOrEqual)
+                self.discard_current()
+            else:
+                self.set_token(TokenType.GreaterThan)
+                self.discard_current()
+        elif self.current == '<':
+            if self.next == '=':
+                self.append_to_current()
+                self.set_token(TokenType.LessThanOrEqual)
+                self.discard_current()
+            else:
+                self.set_token(TokenType.LessThan)
+                self.discard_current()
+
+        elif self.current:
+            while self.next and self.next not in RESERVED_CHARACTERS:
+                self.append_to_current()
+            self.set_token(TokenType.Identifier)
             self.discard_current()
         else:
             raise LexerException(self)
