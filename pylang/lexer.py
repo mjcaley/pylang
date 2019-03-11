@@ -153,7 +153,7 @@ class Lexer:
             self.discard_current()
             self.newline()
         elif self.current in digits:
-            while self.next in digits:
+            while self.next in digits and self.next:
                 self.append_to_current()
             self.set_token(TokenType.Digit, int)
             self.discard_current()
