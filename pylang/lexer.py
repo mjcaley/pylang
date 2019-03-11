@@ -134,6 +134,9 @@ class Lexer:
         self.start_pos = Position(0, 1, 1)
         self.end_pos = Position(0, 1, 1)
 
+        self.beginning = True
+        self.indents = [0]
+
         self.next_token = None
         self.set_token(TokenType.Start)
 
@@ -162,6 +165,7 @@ class Lexer:
         length = self.end_pos.index - self.start_pos.index
         self.start_pos = Position(self.start_pos.index, line_number, 1)
         self.end_pos = Position(self.end_pos.index, line_number, length)
+        self.beginning = True
 
     def emit(self):
         """Emit a single token."""
@@ -170,9 +174,29 @@ class Lexer:
         if not self.current and not self.next:
             self.set_token(TokenType.EOF)
             return next_token
-        else:
-            self.append_to_current()
 
+        if self.beginning:
+            # TODO: Logic is flawed
+            if self.current in INDENT:
+                while self.next in INDENT and self.next:
+                    self.append_to_current()
+                indent_length = len(self.current.replace('\t', ' '))
+                indent_top = self.indents[-1]
+                if indent_length == indent_top:
+                    self.beginning = False
+                    self.discard_current()
+                elif indent_length > indent_top:
+                    self.beginning = False
+                    self.set_token(TokenType.Indent, len)
+                    self.indents.append(indent_length)
+                elif indent_length in self.indents:
+                    self.set_token(TokenType.Dedent)
+                else:
+                    raise LexerException('Invalid indentation', self.start_pos)
+
+        self.append_to_current()
+
+        ### Skip whitespace
         if self.current == '\n':
             self.set_token(TokenType.Newline)
             self.newline()
