@@ -20,16 +20,34 @@ class TokenType(Enum):
     Identifier = auto()
 
     # Keywords
-    Function = auto()
-    Struct = auto()
-    If = auto()
-    While = auto()
-    ForEach = auto()
+    Function = auto()               # func
+    Struct = auto()                 # struct
+    If = auto()                     # if
+    ElseIf = auto()                 # elif
+    Else = auto()                   # else
+    While = auto()                  # while
+    ForEach = auto()                # for
+    And = auto()                    # and
+    Not = auto()                    # not
+    Or = auto()                     # or
 
     # Operators
     Dot = auto()                    # .
     Assignment = auto()             # =
-    Not = auto()                    # !
+
+    # Arithmetic operators
+    Add = auto()                    # +
+    AddAssign = auto()              # +=
+    Subtract = auto()               # -
+    SubtractAssign = auto()         # -=
+    Multiply = auto()               # *
+    MultiplyAssign = auto()         # *=
+    Divide = auto()                 # /
+    DivideAssign = auto()           # /=
+    Modulo = auto()                 # %
+    ModuloAssign = auto()           # %=
+    Exponent = auto()               # **
+    ExponentAssign = auto()         # **=
 
     # Comparison operators
     Equal = auto()                  # ==
@@ -92,7 +110,8 @@ SKIP = [
         '\u180e', '\u200b', '\u200c', '\u200d', '\u2060', '\ufeff']
 NEWLINE = ['\n', '\r']
 INDENT = ['\t', ' ']
-RESERVED_CHARACTERS = ['!', '=', '<', '>', '.', ':'] + SKIP
+ARITHMETIC_CHARACTERS = ['+', '-', '/', '*', '%', '^']
+RESERVED_CHARACTERS = ['!', '=', '<', '>', '.', ':'] + ARITHMETIC_CHARACTERS + SKIP
 
 
 class LexerException(Exception):
@@ -154,60 +173,85 @@ class Lexer:
 
         if self.current == '\n':
             self.set_token(TokenType.Newline)
-            self.discard_current()
             self.newline()
         elif self.current == '\r':
             if self.next == '\n':
                 self.append_to_current()
             self.set_token(TokenType.Newline)
-            self.discard_current()
             self.newline()
         elif self.current in digits:
             while self.next in digits and self.next:
                 self.append_to_current()
             self.set_token(TokenType.Digit, int)
-            self.discard_current()
         elif self.current == '.':
             self.set_token(TokenType.Dot)
-            self.discard_current()
         elif self.current == '=':
             if self.next == '=':
                 self.append_to_current()
                 self.set_token(TokenType.Equal)
-                self.discard_current()
             else:
                 self.set_token(TokenType.Assignment)
-                self.discard_current()
         elif self.current == '!':
             if self.next == '=':
                 self.append_to_current()
                 self.set_token(TokenType.NotEqual)
-                self.discard_current()
             else:
-                self.set_token(TokenType.Not)
-                self.discard_current()
+                raise LexerException('Expected = following !', self.start_pos)
         elif self.current == '>':
             if self.next == '=':
                 self.append_to_current()
                 self.set_token(TokenType.GreaterThanOrEqual)
-                self.discard_current()
             else:
                 self.set_token(TokenType.GreaterThan)
-                self.discard_current()
         elif self.current == '<':
             if self.next == '=':
                 self.append_to_current()
                 self.set_token(TokenType.LessThanOrEqual)
-                self.discard_current()
             else:
                 self.set_token(TokenType.LessThan)
-                self.discard_current()
+
+        elif self.current == '+':
+            if self.next == '=':
+                self.append_to_current()
+                self.set_token(TokenType.AddAssign)
+            else:
+                self.set_token(TokenType.Add)
+        elif self.current == '-':
+            if self.next == '=':
+                self.append_to_current()
+                self.set_token(TokenType.SubtractAssign)
+            else:
+                self.set_token(TokenType.Subtract)
+        elif self.current == '*':
+            if self.next == '*':
+                self.append_to_current()
+                if self.next == '=':
+                    self.append_to_current()
+                    self.set_token(TokenType.ExponentAssign)
+                else:
+                    self.set_token(TokenType.Exponent)
+            elif self.next == '=':
+                self.append_to_current()
+                self.set_token(TokenType.MultiplyAssign)
+            else:
+                self.set_token(TokenType.Multiply)
+        elif self.current == '/':
+            if self.next == '=':
+                self.append_to_current()
+                self.set_token(TokenType.DivideAssign)
+            else:
+                self.set_token(TokenType.Subtract)
+        elif self.current == '%':
+            if self.next == '=':
+                self.append_to_current()
+                self.set_token(TokenType.ModuloAssign)
+            else:
+                self.set_token(TokenType.Modulo)
 
         elif self.current:
             while self.next and self.next not in RESERVED_CHARACTERS:
                 self.append_to_current()
             self.set_token(TokenType.Identifier)
-            self.discard_current()
         else:
             raise LexerException(self)
 
