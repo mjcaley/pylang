@@ -27,14 +27,22 @@ class TokenType(Enum):
     ForEach = auto()
 
     # Operators
-    Dot = auto()
+    Dot = auto()                    # .
+    Assignment = auto()             # =
+
+    # Comparison operators
+    Equal = auto()                  # ==
+    NotEqual = auto()               # !=
+    LessThan = auto()               # <
+    GreaterThan = auto()            # >
+    LessThanOrEqual = auto()        # <=
+    GreaterThanOrEqual = auto()     # >=
 
     LParen = auto()
     RParen = auto()
     LBrace = auto()
     RBrace = auto()
     Colon = auto()
-    Semicolon = auto()
 
     EOF = auto()
 
@@ -156,6 +164,9 @@ class Lexer:
             while self.next in digits and self.next:
                 self.append_to_current()
             self.set_token(TokenType.Digit, int)
+            self.discard_current()
+        elif self.current == '.':
+            self.set_token(TokenType.Dot)
             self.discard_current()
         else:
             raise LexerException(self)
