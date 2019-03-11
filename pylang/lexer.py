@@ -49,6 +49,13 @@ class Token:
     def __len__(self):
         return self.end_position.index - self.start_position.index
 
+    def __repr__(self):
+        return f'{self.__class__.__name__}(' \
+            f'token_type={repr(self.token_type)}, ' \
+            f'start_position={repr(self.start_position)}, ' \
+            f'end_position={repr(self.end_position)}, ' \
+            f'value={repr(self.value)}'
+
     def __str__(self):
         return f'[{self.token_type}] - ' \
             f'line: {self.start_position.line}, ' \
