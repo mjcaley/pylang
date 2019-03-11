@@ -114,7 +114,11 @@ class Lexer:
         """Emit a single token."""
 
         next_token = self.next_token
-        self.append_to_current()
+        if not self.current and not self.next:
+            self.set_token(TokenType.EOF)
+            return next_token
+        else:
+            self.append_to_current()
 
         if self.current == '\n':
             self.set_token(TokenType.Newline)
