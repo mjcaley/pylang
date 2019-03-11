@@ -7,8 +7,12 @@ from string import digits
 
 
 class TokenType(Enum):
+    Start = auto()
+
     Indent = auto()
     Dedent = auto()
+
+    Newline = auto()
 
     Integer = auto()
     Float = auto()
@@ -30,12 +34,24 @@ class TokenType(Enum):
     Colon = auto()
     Semicolon = auto()
 
+    EOF = auto()
+
 
 class Token:
-    def __init__(self, token_type, position, value):
+    def __init__(self, token_type, start_position, end_position, value=None):
         self.token_type = token_type
-        self.position = position
+        self.start_position = start_position
+        self.end_position = end_position
         self.value = value
+
+    def __len__(self):
+        return self.end_position.index - self.start_position.index
+
+    def __str__(self):
+        return f'[{self.token_type}] - ' \
+            f'line: {self.start_position.line}, ' \
+            f'column: {self.start_position.column}, ' \
+            f'length: {len(self)}'
 
 
 Position = namedtuple('Position', ['index', 'line', 'column'])
@@ -45,6 +61,10 @@ Position = namedtuple('Position', ['index', 'line', 'column'])
 prime lexer with newline as next, start and end position is -1 index
 emit token, emits newline
 """
+
+
+class LexerException(Exception):
+    pass
 
 
 class Lexer:
@@ -57,12 +77,12 @@ class Lexer:
             self.data = data
 
         self.current = ''
-        self.next = '\n'
-        self.start_pos = Position(-1, 0, 0)
-        self.end_pos = Position(-1, 0, 0)
+        self.next = self.data.read(1)
+        self.start_pos = Position(0, 1, 1)
+        self.end_pos = Position(0, 1, 1)
 
-    def is_eof(self):
-        return bool(self.next)
+        self.next_token = None
+        self.set_token(TokenType.Start)
 
     def increment_position(self):
         self.end_pos = Position(
@@ -80,9 +100,33 @@ class Lexer:
         self.increment_position()
         self.next = self.data.read(1)
 
+    def set_token(self, token_type):
+        self.next_token = Token(token_type, self.start_pos, self.end_pos, self.current)
+        self.discard_current()
+
+    def newline(self):
+        line_number = self.start_pos.line + 1
+        length = self.end_pos.index - self.start_pos.index
+        self.start_pos = Position(self.start_pos.index, line_number, 1)
+        self.end_pos = Position(self.end_pos.index, line_number, length)
+
     def emit(self):
         """Emit a single token."""
 
-        while not self.is_eof():
-            if self.next == '\n':
+        next_token = self.next_token
+        self.append_to_current()
 
+        if self.current == '\n':
+            self.set_token(TokenType.Newline)
+            self.discard_current()
+            self.newline()
+        elif self.current == '\r':
+            if self.next == '\n':
+                self.append_to_current()
+            self.set_token(TokenType.Newline)
+            self.discard_current()
+            self.newline()
+        else:
+            raise LexerException(self)
+
+        return next_token
