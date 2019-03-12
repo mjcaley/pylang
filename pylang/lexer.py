@@ -156,9 +156,10 @@ class Lexer:
         self.increment_position()
         self.next = self.data.read(1)
 
-    def set_token(self, token_type, cast_func=str):
+    def set_token(self, token_type, cast_func=str, clobber=True):
         self.next_token = Token(token_type, self.start_pos, self.end_pos, cast_func(self.current))
-        self.discard_current()
+        if clobber:
+            self.discard_current()
 
     def newline(self):
         line_number = self.start_pos.line + 1
@@ -176,27 +177,33 @@ class Lexer:
             return next_token
 
         if self.beginning:
-            # TODO: Logic is flawed
-            if self.current in INDENT:
-                while self.next in INDENT and self.next:
-                    self.append_to_current()
-                indent_length = len(self.current.replace('\t', ' '))
-                indent_top = self.indents[-1]
-                if indent_length == indent_top:
-                    self.beginning = False
-                    self.discard_current()
-                elif indent_length > indent_top:
-                    self.beginning = False
-                    self.set_token(TokenType.Indent, len)
-                    self.indents.append(indent_length)
-                elif indent_length in self.indents:
-                    self.set_token(TokenType.Dedent)
-                else:
-                    raise LexerException('Invalid indentation', self.start_pos)
+            while self.next in INDENT and self.next:
+                self.append_to_current()
+            indent_length = len(self.current.replace('\t', ' '))
+            indent_top = self.indents[-1]
+            if indent_length == indent_top:
+                self.beginning = False
+                self.discard_current()
+            elif indent_length > indent_top:
+                self.beginning = False
+                self.indents.append(indent_length)
+                self.set_token(TokenType.Indent, len)
+                return next_token
+            elif indent_length in self.indents:
+                self.indents.pop()
+                self.set_token(TokenType.Dedent, clobber=False)
+                return next_token
+            else:
+                raise LexerException('Invalid indentation', self.start_pos)
 
         self.append_to_current()
 
-        ### Skip whitespace
+        # Skip whitespace
+        if self.current in SKIP and self.current:
+            while self.next in SKIP and self.next:
+                self.append_to_current()
+            self.discard_current()
+
         if self.current == '\n':
             self.set_token(TokenType.Newline)
             self.newline()
