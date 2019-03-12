@@ -203,6 +203,7 @@ class Lexer:
             while self.next in SKIP and self.next:
                 self.append_to_current()
             self.discard_current()
+            self.append_to_current()
 
         if self.current == '\n':
             self.set_token(TokenType.Newline)
