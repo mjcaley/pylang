@@ -65,7 +65,9 @@ class TokenType(Enum):
     RBrace = auto()
     LSquare = auto()
     RSquare = auto()
+
     Colon = auto()
+    Comma = auto()
 
     EOF = auto()
 
@@ -282,6 +284,11 @@ class Lexer:
                 self.set_token(TokenType.ModuloAssign)
             else:
                 self.set_token(TokenType.Modulo)
+
+        elif self.current == ':':
+            self.set_token(TokenType.Colon)
+        elif self.current == ',':
+            self.set_token(TokenType.Comma)
 
         elif self.current == '[':
             self.brackets.append(self.current)
