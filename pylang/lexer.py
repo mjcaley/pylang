@@ -63,6 +63,8 @@ class TokenType(Enum):
     RParen = auto()
     LBrace = auto()
     RBrace = auto()
+    LSquare = auto()
+    RSquare = auto()
     Colon = auto()
 
     EOF = auto()
@@ -130,6 +132,7 @@ class Lexer:
 
         self.beginning = True
         self.indents = [0]
+        self.brackets = []
 
         self.next_token = None
         self.set_token(TokenType.Start)
@@ -160,7 +163,9 @@ class Lexer:
         length = self.end_pos.index - self.start_pos.index
         self.start_pos = Position(self.start_pos.index, line_number, 1)
         self.end_pos = Position(self.end_pos.index, line_number, length)
-        self.beginning = True
+        if not self.brackets:
+            # Inside a bracket, ignore indent/dedent
+            self.beginning = True
 
     def emit(self):
         """Emit a single token."""
@@ -277,6 +282,31 @@ class Lexer:
                 self.set_token(TokenType.ModuloAssign)
             else:
                 self.set_token(TokenType.Modulo)
+
+        elif self.current == '[':
+            self.brackets.append(self.current)
+            self.set_token(TokenType.LSquare)
+        elif self.current == ']':
+            if self.brackets[-1] != '[':
+                raise LexerException(f'Mismatched bracket at {self.start_pos.line}:{self.start_pos.column}')
+            self.brackets.pop()
+            self.set_token(TokenType.RSquare)
+        elif self.current == '{':
+            self.brackets.append(self.current)
+            self.set_token(TokenType.LBrace)
+        elif self.current == '}':
+            if self.brackets[-1] != '{':
+                raise LexerException(f'Mismatched bracket at {self.start_pos.line}:{self.start_pos.column}')
+            self.brackets.pop()
+            self.set_token(TokenType.RBrace)
+        elif self.current == '(':
+            self.brackets.append(self.current)
+            self.set_token(TokenType.LParen)
+        elif self.current == ')':
+            if self.brackets[-1] != ')':
+                raise LexerException(f'Mismatched bracket at {self.start_pos.line}:{self.start_pos.column}')
+            self.brackets.pop()
+            self.set_token(TokenType.RParen)
 
         elif self.current:
             while self.next and self.next not in RESERVED_CHARACTERS:
