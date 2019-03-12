@@ -169,6 +169,13 @@ class Lexer:
             # Inside a bracket, ignore indent/dedent
             self.beginning = True
 
+    def skip(self):
+        if self.current in SKIP and self.current:
+            while self.next in SKIP and self.next:
+                self.append_to_current()
+            self.discard_current()
+            self.append_to_current()
+
     def emit(self):
         """Emit a single token."""
 
@@ -201,12 +208,7 @@ class Lexer:
 
         self.append_to_current()
 
-        # Skip whitespace
-        if self.current in SKIP and self.current:
-            while self.next in SKIP and self.next:
-                self.append_to_current()
-            self.discard_current()
-            self.append_to_current()
+        self.skip()
 
         if self.current == '\n':
             self.set_token(TokenType.Newline)
