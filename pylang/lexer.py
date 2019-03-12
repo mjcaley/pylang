@@ -94,12 +94,6 @@ class Token:
 
 Position = namedtuple('Position', ['index', 'line', 'column'])
 
-
-"""
-prime lexer with newline as next, start and end position is -1 index
-emit token, emits newline
-"""
-
 SKIP = [
         # ASCII whitespace characters
         '\v', '\f', ' ',
@@ -172,10 +166,12 @@ class Lexer:
         """Emit a single token."""
 
         next_token = self.next_token
+
         if not self.current and not self.next:
             self.set_token(TokenType.EOF)
             return next_token
 
+        # Indent and dedent handling for significant whitespace
         if self.beginning:
             while self.next in INDENT and self.next:
                 self.append_to_current()
