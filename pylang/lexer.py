@@ -165,7 +165,7 @@ class Lexer:
         line_number = self.start_pos.line + 1
         length = self.end_pos.index - self.start_pos.index
         self.start_pos = Position(self.start_pos.index, line_number, 1)
-        self.end_pos = Position(self.end_pos.index, line_number, length)
+        self.end_pos = Position(self.end_pos.index, line_number, max(1, length))
         if not self.brackets:
             # Inside a bracket, ignore indent/dedent
             self.beginning = True
@@ -292,7 +292,7 @@ class Lexer:
                 self.append_to_current()
                 self.set_token(TokenType.DivideAssign)
             else:
-                self.set_token(TokenType.Subtract)
+                self.set_token(TokenType.Divide)
         elif self.current == '%':
             if self.next == '=':
                 self.append_to_current()
@@ -325,7 +325,7 @@ class Lexer:
             self.brackets.append(self.current)
             self.set_token(TokenType.LParen)
         elif self.current == ')':
-            if self.brackets[-1] != ')':
+            if self.brackets[-1] != '(':
                 raise LexerException(f'Mismatched bracket at {self.start_pos.line}:{self.start_pos.column}')
             self.brackets.pop()
             self.set_token(TokenType.RParen)
