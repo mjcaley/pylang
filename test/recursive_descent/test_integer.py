@@ -7,23 +7,23 @@ from pylang.recursive_descent import Parser, UnexpectedToken
 
 
 @pytest.mark.parametrize('test_input,expected', [
-    ['true', True],
-    ['false', False]
+    ['4', 4],
+    ['42', 42]
 ])
-def test_bool(test_input, expected):
+def test_integer(test_input, expected):
     l = Lexer(test_input)
     l.emit()
     p = Parser(lexer=l)
 
-    result = p.bool()
+    result = p.integer()
 
     assert expected is result.value
 
 
 def test_bool_exception():
-    l = Lexer('42')
+    l = Lexer('a')
     l.emit()
     p = Parser(lexer=l)
 
     with pytest.raises(UnexpectedToken):
-        p.bool()
+        p.integer()
