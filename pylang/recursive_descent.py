@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .lexer import TokenType
-from .parse_tree import Start, Function
+from .parse_tree import Start, Function, Boolean
 
 
 class ParserException(Exception):
@@ -18,8 +18,17 @@ class Parser:
         self.errors = []
         self.token = None
 
-    def consume(self, expected_token_type):
-        pass
+    def advance(self):
+        self.token = self.lexer.emit()
+        return self.token
+
+    def peek(self):
+        return self.lexer.next_token
+
+    def match(self, *token_types):
+        for item in token_types:
+            pass
+            #TODO: finish
 
     def not_eof(self):
         return self.token.token_type != TokenType.EOF
@@ -28,9 +37,9 @@ class Parser:
         self.errors.append(ParserException(message, token))
 
     def recover(self, skip_to_next_token=TokenType.Newline):
-        while self.lexer.next_token.token_type != skip_to_next_token and \
-              self.lexer.next_token.token_type != TokenType.EOF:
-            self.token = self.lexer.emit()
+        while self.peek().token_type != skip_to_next_token and \
+              self.peek().token_type != TokenType.EOF:
+            self.advance()
 
     def parse(self):
         try:
@@ -55,3 +64,13 @@ class Parser:
 
     def function(self):
         pass
+
+    def bool(self):
+        self.advance()
+
+        if self.token.token_type == TokenType.True_:
+            return Boolean(True)
+        elif self.token.token_type == TokenType.False_:
+            return Boolean(False)
+        else:
+            raise UnexpectedToken

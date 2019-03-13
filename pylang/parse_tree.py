@@ -50,3 +50,8 @@ class Function:
         self.name = name
         self.parameters = parameters
         self.block = block
+
+
+class Boolean:
+    def __init__(self, value):
+        self.value = value
