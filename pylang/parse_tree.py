@@ -55,3 +55,8 @@ class Function:
 class Boolean:
     def __init__(self, value):
         self.value = value
+
+
+class Integer:
+    def __init__(self, value):
+        self.value = value

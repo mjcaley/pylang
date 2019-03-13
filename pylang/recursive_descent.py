@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .lexer import TokenType
-from .parse_tree import Start, Function, Boolean
+from .parse_tree import Start, Function, Boolean, Integer
 
 
 class ParserException(Exception):
@@ -72,5 +72,13 @@ class Parser:
         elif self.token.token_type == TokenType.False_:
             self.advance()
             return Boolean(False)
+        else:
+            raise UnexpectedToken
+
+    def integer(self):
+        if self.token.token_type == TokenType.Integer:
+            node = Integer(value=self.token.value)
+            self.advance()
+            return node
         else:
             raise UnexpectedToken
