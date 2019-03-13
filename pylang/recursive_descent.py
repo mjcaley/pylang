@@ -16,7 +16,7 @@ class Parser:
     def __init__(self, lexer):
         self.lexer = lexer
         self.errors = []
-        self.token = None
+        self.token = self.lexer.emit()
 
     def advance(self):
         self.token = self.lexer.emit()
@@ -66,11 +66,11 @@ class Parser:
         pass
 
     def bool(self):
-        self.advance()
-
         if self.token.token_type == TokenType.True_:
+            self.advance()
             return Boolean(True)
         elif self.token.token_type == TokenType.False_:
+            self.advance()
             return Boolean(False)
         else:
             raise UnexpectedToken
