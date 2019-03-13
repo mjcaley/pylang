@@ -14,7 +14,8 @@ class TokenType(Enum):
 
     Newline = auto()
 
-    Digit = auto()
+    Integer = auto()
+    Float = auto()                  # 4.2 or .42
     String = auto()
 
     Identifier = auto()
@@ -221,9 +222,21 @@ class Lexer:
         elif self.current in digits:
             while self.next in digits and self.next:
                 self.append_to_current()
-            self.set_token(TokenType.Digit, int)
+            if self.next == '.':
+                self.append_to_current()
+                while self.next in digits and self.next:
+                    self.append_to_current()
+                self.set_token(TokenType.Float)
+            else:
+                self.set_token(TokenType.Integer, int)
         elif self.current == '.':
-            self.set_token(TokenType.Dot)
+            if self.next in digits and self.next:
+                self.append_to_current()
+                while self.next in digits and self.next:
+                    self.append_to_current()
+                self.set_token(TokenType.Float)
+            else:
+                self.set_token(TokenType.Dot)
         elif self.current == '=':
             if self.next == '=':
                 self.append_to_current()
