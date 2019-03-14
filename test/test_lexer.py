@@ -139,6 +139,8 @@ def test_skip():
     ['/=', TokenType.DivideAssign],
     ['%', TokenType.Modulo],
     ['%=', TokenType.ModuloAssign],
+    ['**', TokenType.Exponent],
+    ['**=', TokenType.ExponentAssign],
     [':', TokenType.Colon],
     [',', TokenType.Comma]
 ])
@@ -204,3 +206,51 @@ def test_identifier():
     l.emit()
 
     assert TokenType.Identifier == l.emit().token_type
+
+
+@pytest.mark.parametrize('test_input', [
+    '    42\n42',
+    ' 42\n42',
+    '\t42\n42'
+])
+def test_single_indent_and_dedent(test_input):
+    l = Lexer(test_input)
+    l.emit()
+
+    assert TokenType.Indent == l.emit().token_type
+    l.emit()    # ignore token
+    assert TokenType.Newline == l.emit().token_type
+    assert TokenType.Dedent == l.emit().token_type
+
+
+@pytest.mark.parametrize('test_input', [
+    '    42\n        42\n',
+    ' 42\n  42\n',
+    '\t42\n\t\t42\n'
+])
+def test_multilevel_indent_and_dedent(test_input):
+    l = Lexer(test_input)
+    l.emit()
+
+    assert TokenType.Indent == l.emit().token_type
+    l.emit()    # ignore token
+    assert TokenType.Newline == l.emit().token_type
+    assert TokenType.Indent == l.emit().token_type
+    l.emit()    # ignore token
+    assert TokenType.Newline == l.emit().token_type
+    assert TokenType.Dedent == l.emit().token_type
+    assert TokenType.Dedent == l.emit().token_type
+
+
+@pytest.mark.parametrize('test_input,num_tokens', [
+    ['42', 2],
+    ['42\n', 3],
+    ['\t42\n42', 6]
+])
+def test_eof(test_input, num_tokens):
+    l = Lexer(test_input)
+
+    for token in range(num_tokens):
+        assert TokenType.EOF != l.emit()
+
+    assert TokenType.EOF == l.emit().token_type

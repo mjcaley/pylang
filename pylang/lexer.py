@@ -182,10 +182,6 @@ class Lexer:
 
         next_token = self.next_token
 
-        if not self.current and not self.next:
-            self.set_token(TokenType.EOF)
-            return next_token
-
         # Indent and dedent handling for significant whitespace
         if self.beginning:
             while self.next in INDENT and self.next:
@@ -206,6 +202,10 @@ class Lexer:
                 return next_token
             else:
                 raise LexerException('Invalid indentation', self.start_pos)
+
+        if not self.current and not self.next:
+            self.set_token(TokenType.EOF)
+            return next_token
 
         self.append_to_current()
 
