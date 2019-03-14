@@ -65,6 +65,31 @@ class Parser:
     def function(self):
         pass
 
+    def atom(self):
+        try:
+            return self.float()
+        except UnexpectedToken:
+            pass
+
+        try:
+            return self.integer()
+        except UnexpectedToken:
+            pass
+
+        try:
+            return self.bool()
+        except UnexpectedToken:
+            pass
+
+        try:
+            return self.identifier()
+        except UnexpectedToken:
+            pass
+
+        # TODO: parse parentheses expression
+
+        raise UnexpectedToken
+
     def bool(self):
         if self.token.token_type == TokenType.True_:
             self.advance()
