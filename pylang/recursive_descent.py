@@ -72,6 +72,14 @@ class Parser:
     def function(self):
         pass
 
+    def statement(self):
+        expr = self.expression()
+        if self.token.token_type == TokenType.Newline:
+            self.advance()
+        else:
+            raise UnexpectedToken
+        return expr
+
     def expression(self):
         return self.assignment_expr()
 
