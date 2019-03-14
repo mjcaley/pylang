@@ -29,6 +29,11 @@ class BinaryExpression(Expression):
         self.right = right
 
 
+class AssignmentExpression(Expression):
+    def __init__(self, left, operator, right):
+        super().__init__(left, operator, right)
+
+
 class SumExpression(BinaryExpression):
     def __init__(self, left, operator, right):
         super().__init__(left, operator, right)
