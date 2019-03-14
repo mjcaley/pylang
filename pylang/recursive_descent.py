@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 from .lexer import TokenType
-from .parse_tree import Start, Function, Boolean, Integer, Float, Identifier, UnaryExpression, ProductExpression, SumExpression, AssignmentExpression
+from .parse_tree import Start, Function, Boolean, Integer, Float, Identifier, UnaryExpression, ProductExpression, \
+    SumExpression, AssignmentExpression
 
 
 class ParserException(Exception):
@@ -34,7 +35,7 @@ class Parser:
     def match(self, *token_types):
         for item in token_types:
             pass
-            #TODO: finish
+            # TODO: finish
 
     def not_eof(self):
         return self.token.token_type != TokenType.EOF
@@ -44,7 +45,7 @@ class Parser:
 
     def recover(self, skip_to_next_token=TokenType.Newline):
         while self.peek().token_type != skip_to_next_token and \
-              self.peek().token_type != TokenType.EOF:
+                self.peek().token_type != TokenType.EOF:
             self.advance()
 
     def parse(self):
@@ -87,7 +88,7 @@ class Parser:
     def sum_expr(self):
         left = self.product_expr()
         if self.token.token_type == TokenType.Plus or \
-           self.token.token_type == TokenType.Minus:
+                self.token.token_type == TokenType.Minus:
             operator = self.token
             self.advance()
             right = self.expression()
@@ -98,7 +99,7 @@ class Parser:
     def product_expr(self):
         left = self.unary_expr()
         if self.token.token_type == TokenType.Multiply or \
-           self.token.token_type == TokenType.Divide:
+                self.token.token_type == TokenType.Divide:
             operator = self.token
             self.advance()
             right = self.expression()
@@ -173,4 +174,3 @@ class Parser:
             return node
         else:
             raise UnexpectedToken
-
