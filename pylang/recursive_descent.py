@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .lexer import TokenType
-from .parse_tree import Start, Function, Boolean, Integer, Float, Identifier, UnaryExpression, ProductExpression
+from .parse_tree import Start, Function, Boolean, Integer, Float, Identifier, UnaryExpression, ProductExpression, SumExpression
 
 
 class ParserException(Exception):
@@ -66,7 +66,18 @@ class Parser:
         pass
 
     def expression(self):
-        return self.product_expr()
+        return self.sum_expr()
+
+    def sum_expr(self):
+        left = self.product_expr()
+        if self.token.token_type == TokenType.Plus or \
+           self.token.token_type == TokenType.Minus:
+            operator = self.token
+            self.advance()
+            right = self.expression()
+            return SumExpression(left, operator, right)
+        else:
+            return left
 
     def product_expr(self):
         left = self.unary_expr()
