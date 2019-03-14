@@ -39,10 +39,10 @@ class TokenType(Enum):
     Assignment = auto()             # =
 
     # Arithmetic operators
-    Add = auto()                    # +
-    AddAssign = auto()              # +=
-    Subtract = auto()               # -
-    SubtractAssign = auto()         # -=
+    Plus = auto()                   # +
+    PlusAssign = auto()             # +=
+    Minus = auto()                  # -
+    MinusAssign = auto()            # -=
     Multiply = auto()               # *
     MultiplyAssign = auto()         # *=
     Divide = auto()                 # /
@@ -71,6 +71,8 @@ class TokenType(Enum):
     Comma = auto()
 
     EOF = auto()
+
+    Error = auto()
 
 
 class Token:
@@ -265,15 +267,15 @@ class Lexer:
         elif self.current == '+':
             if self.next == '=':
                 self.append_to_current()
-                self.set_token(TokenType.AddAssign)
+                self.set_token(TokenType.PlusAssign)
             else:
-                self.set_token(TokenType.Add)
+                self.set_token(TokenType.Plus)
         elif self.current == '-':
             if self.next == '=':
                 self.append_to_current()
-                self.set_token(TokenType.SubtractAssign)
+                self.set_token(TokenType.MinusAssign)
             else:
-                self.set_token(TokenType.Subtract)
+                self.set_token(TokenType.Minus)
         elif self.current == '*':
             if self.next == '*':
                 self.append_to_current()
