@@ -22,6 +22,12 @@ class Parser:
         self.token = self.lexer.emit()
         return self.token
 
+    def consume(self):
+        token = self.token
+        self.advance()
+
+        return token
+
     def peek(self):
         return self.lexer.next_token
 
@@ -75,6 +81,8 @@ class Parser:
             self.advance()
             right = self.expression()
             return AssignmentExpression(left, operator, right)
+        else:
+            return left
 
     def sum_expr(self):
         left = self.product_expr()

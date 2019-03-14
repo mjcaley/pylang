@@ -29,7 +29,7 @@ class BinaryExpression(Expression):
         self.right = right
 
 
-class AssignmentExpression(Expression):
+class AssignmentExpression(BinaryExpression):
     def __init__(self, left, operator, right):
         super().__init__(left, operator, right)
 
