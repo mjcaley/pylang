@@ -137,7 +137,13 @@ class Parser:
         except UnexpectedToken:
             pass
 
-        # TODO: parse parentheses expression
+        if self.token.token_type == TokenType.LParen:
+            self.advance()
+            expr = self.expression()
+            if self.token.token_type == TokenType.RParen:
+                return expr
+            else:
+                raise UnexpectedToken
 
         raise UnexpectedToken
 

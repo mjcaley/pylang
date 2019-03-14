@@ -11,7 +11,8 @@ from pylang.parse_tree import Boolean, Float, Identifier, Integer
     ['42', Integer],
     ['4.2', Float],
     ['abc', Identifier],
-    ['true', Boolean]
+    ['true', Boolean],
+    ['(42)', Integer]
 ])
 def test_identifier(test_input, expected):
     l = Lexer(test_input)
