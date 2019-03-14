@@ -52,11 +52,22 @@ class Function:
         self.block = block
 
 
-class Boolean:
+class Atom:
     def __init__(self, value):
         self.value = value
 
 
-class Integer:
-    def __init__(self, value):
-        self.value = value
+class Identifier(Atom):
+    pass
+
+
+class Boolean(Atom):
+    pass
+
+
+class Integer(Atom):
+    pass
+
+
+class Float(Atom):
+    pass
