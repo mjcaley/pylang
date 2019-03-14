@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .lexer import TokenType
-from .parse_tree import Start, Function, Boolean, Integer, Float, Identifier
+from .parse_tree import Start, Function, Boolean, Integer, Float, Identifier, UnaryExpression
 
 
 class ParserException(Exception):
@@ -64,6 +64,18 @@ class Parser:
 
     def function(self):
         pass
+
+    def expression(self):
+        return self.unary_expr()
+
+    def unary_expr(self):
+        if self.token.token_type == TokenType.Minus:
+            operation = self.token
+            self.advance()
+            expression = self.expression()
+            return UnaryExpression(operation, expression)
+        else:
+            return self.atom()
 
     def atom(self):
         try:
