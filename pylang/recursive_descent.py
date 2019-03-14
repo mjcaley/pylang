@@ -72,6 +72,20 @@ class Parser:
     def function(self):
         pass
 
+    def block(self):
+        statements = []
+
+        if self.token.token_type != TokenType.Indent:
+            raise UnexpectedToken
+        self.advance()
+        while self.token.token_type != TokenType.Dedent and \
+                self.token.token_type != TokenType.EOF:
+            statements.append(self.statement())
+        if self.token.token_type == TokenType.Dedent:
+            self.advance()
+
+        return statements
+
     def statement(self):
         expr = self.expression()
         if self.token.token_type == TokenType.Newline:
