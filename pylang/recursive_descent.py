@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .lexer import TokenType
-from .parse_tree import Start, Function, Boolean, Integer, Float, Identifier, UnaryExpression
+from .parse_tree import Start, Function, Boolean, Integer, Float, Identifier, UnaryExpression, ProductExpression
 
 
 class ParserException(Exception):
@@ -66,7 +66,18 @@ class Parser:
         pass
 
     def expression(self):
-        return self.unary_expr()
+        return self.product_expr()
+
+    def product_expr(self):
+        left = self.unary_expr()
+        if self.token.token_type == TokenType.Multiply or \
+           self.token.token_type == TokenType.Divide:
+            operator = self.token
+            self.advance()
+            right = self.expression()
+            return ProductExpression(left, operator, right)
+        else:
+            return left
 
     def unary_expr(self):
         if self.token.token_type == TokenType.Minus:
