@@ -8,6 +8,12 @@ class Start:
         self.functions: List[Function] = functions
 
 
+class Function:
+    def __init__(self, definition, block):
+        self.definition = definition
+        self.block = block
+
+
 class FunctionDecl:
     def __init__(self, name, parameters, return_type):
         self.name = name
@@ -55,13 +61,6 @@ class UnaryExpression(Expression):
     def __init__(self, operator, expression):
         self.operator = operator
         self.expression = expression
-
-
-class Function:
-    def __init__(self, name, parameters, block):
-        self.name = name
-        self.parameters = parameters
-        self.block = block
 
 
 class Atom:

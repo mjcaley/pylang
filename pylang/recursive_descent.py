@@ -107,7 +107,18 @@ class Parser:
             return FunctionDecl(name, parameters, None)
 
     def function(self):
-        pass
+        definition = self.function_decl()
+
+        if self.token.token_type != TokenType.Assignment:
+            raise UnexpectedToken
+        self.advance()
+        if self.token.token_type != TokenType.Newline:
+            raise UnexpectedToken
+        self.advance()
+
+        statements = self.block()
+
+        return Function(definition, statements)
 
     def block(self):
         statements = []
