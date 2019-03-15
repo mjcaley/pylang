@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .lexer import TokenType
-from .parse_tree import Start, Function, Boolean, Integer, Float, Identifier, UnaryExpression, ProductExpression, \
+from .parse_tree import Start, FunctionDecl, Function, Boolean, Integer, Float, Identifier, UnaryExpression, ProductExpression, \
     SumExpression, AssignmentExpression
 
 
@@ -89,11 +89,22 @@ class Parser:
             raise UnexpectedToken
         self.advance()
 
-
+        parameters = []
+        try:
+            parameters = self.parameters()
+        except UnexpectedToken:
+            pass
 
         if self.token.token_type != TokenType.RParen:
             raise UnexpectedToken
         self.advance()
+
+        if self.token.token_type == TokenType.Colon:
+            self.advance()
+            return_type = self.identifier()
+            return FunctionDecl(name, parameters, return_type)
+        else:
+            return FunctionDecl(name, parameters, None)
 
     def function(self):
         pass

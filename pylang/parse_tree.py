@@ -8,6 +8,13 @@ class Start:
         self.functions: List[Function] = functions
 
 
+class FunctionDecl:
+    def __init__(self, name, parameters, return_type):
+        self.name = name
+        self.parameters = parameters
+        self.return_type = return_type
+
+
 class Block:
     def __init__(self, *statements):
         self.statements: List[Statement] = statements
