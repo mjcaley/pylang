@@ -208,6 +208,31 @@ def test_identifier():
     assert TokenType.Identifier == l.emit().token_type
 
 
+@pytest.mark.parametrize('test_input,expected', [
+    ['abc+', 'abc'],
+    ['abc-', 'abc'],
+    ['abc*', 'abc'],
+    ['abc/', 'abc'],
+    ['abc%', 'abc'],
+    ['abc(', 'abc'],
+    ['abc)', 'abc'],
+    ['abc[', 'abc'],
+    ['abc]', 'abc'],
+    ['abc{', 'abc'],
+    ['abc}', 'abc'],
+    ['abc,', 'abc'],
+    ['abc=', 'abc'],
+    ['abc:', 'abc'],
+    ['abc<', 'abc'],
+    ['abc>', 'abc']
+])
+def test_identifier_doesnt_consume_operators(test_input, expected):
+    l = Lexer(test_input)
+    l.emit()
+
+    assert expected == l.emit().value
+
+
 @pytest.mark.parametrize('test_input', [
     '    42\n42',
     ' 42\n42',

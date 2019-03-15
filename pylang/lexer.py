@@ -114,7 +114,8 @@ SKIP = [
 NEWLINE = ['\n', '\r']
 INDENT = ['\t', ' ']
 ARITHMETIC_CHARACTERS = ['+', '-', '/', '*', '%', '^']
-RESERVED_CHARACTERS = ['!', '=', '<', '>', '.', ':'] + ARITHMETIC_CHARACTERS + INDENT + NEWLINE + SKIP
+BRACKETS = ['(', ')', '[', ']', '{', '}']
+RESERVED_CHARACTERS = ['!', '=', '<', '>', '.', ':', ','] + ARITHMETIC_CHARACTERS + BRACKETS + INDENT + NEWLINE + SKIP
 
 
 class LexerException(Exception):
@@ -158,8 +159,21 @@ class Lexer:
         self.increment_position()
         self.next = self.data.read(1)
 
-    def set_token(self, token_type, cast_func=str, clobber=True):
-        self.next_token = Token(token_type, self.start_pos, self.end_pos, cast_func(self.current))
+    def set_token(self, token_type, cast_func=str, clobber=True, value=None):
+        if value:
+            self.next_token = Token(
+                token_type,
+                self.start_pos,
+                self.end_pos,
+                value
+            )
+        else:
+            self.next_token = Token(
+                token_type,
+                self.start_pos,
+                self.end_pos,
+                cast_func(self.current)
+            )
         if clobber:
             self.discard_current()
 
@@ -203,7 +217,7 @@ class Lexer:
                 self.set_token(TokenType.Dedent, clobber=False)
                 return next_token
             else:
-                raise LexerException('Invalid indentation', self.start_pos)
+                self.set_token(TokenType.Error, value=TokenType.Dedent)
 
         if not self.current and not self.next:
             self.set_token(TokenType.EOF)
@@ -250,7 +264,7 @@ class Lexer:
                 self.append_to_current()
                 self.set_token(TokenType.NotEqual)
             else:
-                raise LexerException('Expected = following !', self.start_pos)
+                self.set_token(TokenType.Error, value=TokenType.NotEqual)
         elif self.current == '>':
             if self.next == '=':
                 self.append_to_current()
@@ -311,26 +325,35 @@ class Lexer:
             self.brackets.append(self.current)
             self.set_token(TokenType.LSquare)
         elif self.current == ']':
-            if self.brackets[-1] != '[':
-                raise LexerException(f'Mismatched bracket at {self.start_pos.line}:{self.start_pos.column}')
-            self.brackets.pop()
-            self.set_token(TokenType.RSquare)
+            try:
+                if self.brackets[-1] != '[':
+                    self.set_token(TokenType.Error, value=TokenType.RSquare)
+                self.brackets.pop()
+                self.set_token(TokenType.RSquare)
+            except IndexError:
+                self.set_token(TokenType.Error, value=TokenType.RSquare)
         elif self.current == '{':
             self.brackets.append(self.current)
             self.set_token(TokenType.LBrace)
         elif self.current == '}':
-            if self.brackets[-1] != '{':
-                raise LexerException(f'Mismatched bracket at {self.start_pos.line}:{self.start_pos.column}')
-            self.brackets.pop()
-            self.set_token(TokenType.RBrace)
+            try:
+                if self.brackets[-1] != '{':
+                    self.set_token(TokenType.Error, value=TokenType.RBrace)
+                self.brackets.pop()
+                self.set_token(TokenType.RBrace)
+            except IndexError:
+                self.set_token(TokenType.Error, value=TokenType.RBrace)
         elif self.current == '(':
             self.brackets.append(self.current)
             self.set_token(TokenType.LParen)
         elif self.current == ')':
-            if self.brackets[-1] != '(':
-                raise LexerException(f'Mismatched bracket at {self.start_pos.line}:{self.start_pos.column}')
-            self.brackets.pop()
-            self.set_token(TokenType.RParen)
+            try:
+                if self.brackets[-1] != '(':
+                    self.set_token(TokenType.Error, value=TokenType.RParen)
+                self.brackets.pop()
+                self.set_token(TokenType.RParen)
+            except IndexError:
+                self.set_token(TokenType.Error, value=TokenType.RParen)
 
         elif self.current:
             while self.next and self.next not in RESERVED_CHARACTERS:
@@ -363,6 +386,6 @@ class Lexer:
             else:
                 self.set_token(TokenType.Identifier)
         else:
-            raise LexerException(self)
+            self.set_token(TokenType.Error)
 
         return next_token
