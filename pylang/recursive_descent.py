@@ -37,8 +37,8 @@ class Parser:
             pass
             # TODO: finish
 
-    def not_eof(self):
-        return self.token.token_type != TokenType.EOF
+    def eof(self):
+        return self.token.token_type == TokenType.EOF
 
     def report_error(self, message, token):
         self.errors.append(ParserException(message, token))
@@ -56,18 +56,17 @@ class Parser:
 
     def start(self):
         functions = []
-        self.token = self.lexer.emit()
+
         if self.token.token_type != TokenType.Start:
             raise ParserException('Could not find Start token')
 
-        while self.not_eof():
-            func_token = self.token
+        while not self.eof():
             try:
                 functions.append(self.function())
-            except ParserException:
-                self.report_error('Unable to parse function', func_token)
+            except UnexpectedToken:
+                self.recover(TokenType.Function)
 
-        return Start(functions=functions)
+        return Start(*functions)
 
     def parameters(self):
         params = [self.identifier()]
