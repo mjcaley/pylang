@@ -219,13 +219,13 @@ class Lexer:
             else:
                 self.set_token(TokenType.Error, value=TokenType.Dedent)
 
-        if not self.current and not self.next:
-            self.set_token(TokenType.EOF)
-            return next_token
-
         self.append_to_current()
 
         self.skip()
+
+        if not self.current and not self.next:
+            self.set_token(TokenType.EOF)
+            return next_token
 
         if self.current == '\n':
             self.set_token(TokenType.Newline)
