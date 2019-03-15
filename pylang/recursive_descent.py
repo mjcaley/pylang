@@ -70,27 +70,11 @@ class Parser:
         return Start(functions=functions)
 
     def parameters(self):
-        params = []
-        if self.token.token_type == TokenType.LParen:
+        params = [self.identifier()]
+
+        while self.token.token_type == TokenType.Comma:
             self.advance()
-        else:
-            raise UnexpectedToken
-
-        if self.token.token_type == TokenType.RParen:
-            return params
-
-        params.append(self.identifier())
-        while self.token.token_type != TokenType.RParen:
-            if self.token.token_type == TokenType.Comma:
-                self.advance()
-            else:
-                break
             params.append(self.identifier())
-
-        if self.token.token_type == TokenType.RParen:
-            self.advance()
-        else:
-            raise UnexpectedToken
 
         return params
 

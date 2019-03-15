@@ -7,29 +7,24 @@ from pylang.recursive_descent import Parser, UnexpectedToken
 from pylang.parse_tree import Identifier
 
 
-@pytest.mark.parametrize('test_input', [
-    '()',
-    '(abc)'
-    '(abc, def, ghi)'
+@pytest.mark.parametrize('test_input,length', [
+    ['abc', 1],
+    ['abc, def, ghi', 3]
 ])
-def test_parameters(test_input):
+def test_parameters(test_input, length):
     l = Lexer(test_input)
     l.emit()
     p = Parser(lexer=l)
 
     result = p.parameters()
 
+    assert length == len(result)
     for node in result:
         assert isinstance(node, Identifier)
 
 
-@pytest.mark.parametrize('test_input', [
-    'abc',
-    '(42',
-    '(abc def)'
-])
-def test_parameters_raises(test_input):
-    l = Lexer(test_input)
+def test_parameters_raises():
+    l = Lexer('abc,')
     l.emit()
     p = Parser(l)
 
