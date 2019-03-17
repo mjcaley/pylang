@@ -7,8 +7,6 @@ from string import digits
 
 
 class TokenType(Enum):
-    Start = auto()
-
     Indent = auto()
     Dedent = auto()
 
@@ -75,33 +73,30 @@ class TokenType(Enum):
     Error = auto()
 
 
-class Token:
-    def __init__(self, token_type, start_position, end_position, value=None):
-        self.token_type = token_type
-        self.start_position = start_position
-        self.end_position = end_position
-        self.value = value
+Position = namedtuple('Position', ['index', 'line', 'column'])
 
-    def __len__(self):
-        return self.end_position.index - self.start_position.index
+
+class Token:
+    def __init__(self, token_type, position, value=None):
+        self.token_type = token_type
+        self.position = position
+        self.value = value
 
     def __repr__(self):
         return f'{self.__class__.__name__}(' \
             f'token_type={repr(self.token_type)}, ' \
-            f'start_position={repr(self.start_position)}, ' \
-            f'end_position={repr(self.end_position)}, ' \
+            f'position={repr(self.position)}, ' \
             f'value={repr(self.value)}'
 
     def __str__(self):
         return f'[{self.token_type}] - ' \
-            f'line: {self.start_position.line}, ' \
-            f'column: {self.start_position.column}, ' \
-            f'length: {len(self)}'
+            f'line: {self.position.line}, ' \
+            f'column: {self.position.column} - ' \
+            f'{repr(self.value)}'
 
 
-Position = namedtuple('Position', ['index', 'line', 'column'])
-
-SKIP = [
+class Lexer:
+    WHITESPACE = [
         # ASCII whitespace characters
         '\v', '\f', ' ',
 
@@ -110,19 +105,15 @@ SKIP = [
         '\u2008', '\u2009', '\u200a', '\u2028', '\u2029', '\u202f', '\u205f', '\u3000',
 
         # Other whitespace characters
-        '\u180e', '\u200b', '\u200c', '\u200d', '\u2060', '\ufeff']
-NEWLINE = ['\n', '\r']
-INDENT = ['\t', ' ']
-ARITHMETIC_CHARACTERS = ['+', '-', '/', '*', '%', '^']
-BRACKETS = ['(', ')', '[', ']', '{', '}']
-RESERVED_CHARACTERS = ['!', '=', '<', '>', '.', ':', ','] + ARITHMETIC_CHARACTERS + BRACKETS + INDENT + NEWLINE + SKIP
+        '\u180e', '\u200b', '\u200c', '\u200d', '\u2060', '\ufeff'
+    ]
+    NEWLINE = ['\n', '\r']
+    INDENT = ['\t', ' ']
+    ARITHMETIC_CHARACTERS = ['+', '-', '/', '*', '%', '^']
+    BRACKETS = ['(', ')', '[', ']', '{', '}']
+    RESERVED_CHARACTERS = ['!', '=', '<', '>', '.', ':',
+                           ','] + ARITHMETIC_CHARACTERS + BRACKETS + INDENT + NEWLINE + WHITESPACE
 
-
-class LexerException(Exception):
-    pass
-
-
-class Lexer:
     def __init__(self, data):
         if type(data) == str:
             self.data = StringIO(data)
@@ -132,260 +123,327 @@ class Lexer:
             self.data = data
 
         self.current = ''
+        self.current_position = Position(index=0, line=1, column=1)
+
         self.next = self.data.read(1)
-        self.start_pos = Position(0, 1, 1)
-        self.end_pos = Position(0, 1, 1)
+        self.next_position = Position(index=0, line=1, column=1)
 
         self.beginning = True
         self.indents = [0]
         self.brackets = []
 
-        self.next_token = None
-        self.set_token(TokenType.Start)
-
-    def increment_position(self):
-        self.end_pos = Position(
-            self.end_pos.index + 1,
-            self.end_pos.line,
-            self.end_pos.column + 1
+        self.token = Token(
+            token_type=TokenType.Indent,
+            position=self.current_position,
+            value=0
         )
 
-    def discard_current(self):
-        self.current = ''
-        self.start_pos = self.end_pos
-
-    def append_to_current(self):
-        self.current += self.next
-        self.increment_position()
+    def advance(self):
+        last = self.next
         self.next = self.data.read(1)
 
-    def set_token(self, token_type, cast_func=str, clobber=True, value=None):
-        if value:
-            self.next_token = Token(
-                token_type,
-                self.start_pos,
-                self.end_pos,
-                value
+        if not last:
+            pass
+        elif last == '\n':
+            self.next_position = Position(
+                index=self.next_position.index + 1,
+                line=self.next_position.line + 1,
+                column=1
             )
-        else:
-            self.next_token = Token(
-                token_type,
-                self.start_pos,
-                self.end_pos,
-                cast_func(self.current)
-            )
-        if clobber:
-            self.discard_current()
-
-    def newline(self):
-        line_number = self.start_pos.line + 1
-        length = self.end_pos.index - self.start_pos.index
-        self.start_pos = Position(self.start_pos.index, line_number, 1)
-        self.end_pos = Position(self.end_pos.index, line_number, max(1, length))
-        if not self.brackets:
-            # Inside a bracket, ignore indent/dedent
             self.beginning = True
+        elif last == '\r' and self.next != '\n':
+            self.next_position = Position(
+                index=self.next_position.index + 1,
+                line=self.next_position.line + 1,
+                column=1
+            )
+            self.beginning = True
+        else:
+            self.next_position = Position(
+                index=self.next_position.index + 1,
+                line=self.next_position.line,
+                column=self.next_position.column + 1
+            )
+
+        return last
+
+    def append(self):
+        if not self.current:
+            self.current_position = self.next_position
+        next_character = self.advance()
+        self.current += next_character
+
+    def append_while(self, characters):
+        while self.next in characters and self.next:
+            self.append()
+
+    def append_while_not(self, characters):
+        while self.next not in characters and self.next:
+            self.append()
+
+    def consume(self):
+        current = self.current
+        self.current = ''
+
+        return current
+
+    def discard(self):
+        self.consume()
 
     def skip(self):
-        if self.current in SKIP and self.current:
-            while self.next in SKIP and self.next:
-                self.append_to_current()
-            self.discard_current()
-            self.append_to_current()
+        self.append_while(self.WHITESPACE)
+        self.consume()
+
+    def skip_until(self, characters):
+        while self.next not in characters:
+            self.advance()
+
+    def skip_while(self, characters):
+        while self.next in characters and self.next:
+            self.advance()
+
+    def skip_empty_lines(self):
+        while self.current and self.match_next(self.NEWLINE):
+            self.skip_while(self.NEWLINE)
+            self.discard()
+            self.append_while(self.WHITESPACE + self.INDENT)
+
+    def match(self, characters):
+        return characters == self.current
+
+    def match_next(self, characters):
+        return all([self.next in characters, self.next])
+
+    def contains(self, characters):
+        return all([self.current in characters, self.current])
+
+    def next_contains(self, characters):
+        return all([self.next in characters, self.next])
+
+    def push_bracket(self, left_token_type):
+        self.brackets.append(left_token_type)
+        return self.new_token(
+            token_type=left_token_type
+        )
+
+    def pop_bracket(self, left_token_type, right_token_type):
+        try:
+            if self.brackets[-1] == left_token_type:
+                self.new_token(
+                    token_type=right_token_type
+                )
+            else:
+                self.new_token(
+                    token_type=TokenType.Error,
+                    value=right_token_type
+                )
+        except IndexError:
+            self.new_token(
+                token_type=TokenType.Error,
+                value=right_token_type
+            )
+
+    def is_indent_dedent(self):
+        if self.beginning:
+            self.append_while(self.INDENT)
+            self.skip_empty_lines()
+            indent = len(self.consume())
+            top = self.indents[-1]
+            self.beginning = False
+
+            if indent > top:
+                self.new_token(
+                    token_type=TokenType.Indent,
+                    value=indent
+                )
+                self.indents.append(indent)
+                return True
+            elif indent < top:
+                dedent = self.indents.pop()
+                self.new_token(
+                    token_type=TokenType.Dedent,
+                    value=dedent
+                )
+                return True
+
+    def is_eof(self):
+        return all([not self.current, not self.next])
+
+    def new_token(self, token_type, value=None):
+        token = Token(
+            token_type=token_type,
+            position=self.current_position,
+            value=value
+        )
+        self.token = token
+        return token
 
     def emit(self):
-        """Emit a single token."""
+        next_token = self.token
 
-        next_token = self.next_token
-
-        # Indent and dedent handling for significant whitespace
-        if self.beginning:
-            while self.next in INDENT and self.next:
-                self.append_to_current()
-            indent_length = len(self.current.replace('\t', ' '))
-            indent_top = self.indents[-1]
-            if indent_length == indent_top:
-                self.beginning = False
-                self.discard_current()
-            elif indent_length > indent_top:
-                self.beginning = False
-                self.indents.append(indent_length)
-                self.set_token(TokenType.Indent, len)
-                return next_token
-            elif indent_length in self.indents:
-                self.indents.pop()
-                self.set_token(TokenType.Dedent, clobber=False)
-                return next_token
-            else:
-                self.set_token(TokenType.Error, value=TokenType.Dedent)
-
-        self.append_to_current()
-
-        self.skip()
-
-        if not self.current and not self.next:
-            self.set_token(TokenType.EOF)
+        if self.is_indent_dedent():
             return next_token
 
-        if self.current == '\n':
-            self.set_token(TokenType.Newline)
-            self.newline()
-        elif self.current == '\r':
-            if self.next == '\n':
-                self.append_to_current()
-            self.set_token(TokenType.Newline)
-            self.newline()
-        elif self.current in digits:
-            while self.next in digits and self.next:
-                self.append_to_current()
-            if self.next == '.':
-                self.append_to_current()
-                while self.next in digits and self.next:
-                    self.append_to_current()
-                self.set_token(TokenType.Float)
-            else:
-                self.set_token(TokenType.Integer, int)
-        elif self.current == '.':
-            if self.next in digits and self.next:
-                self.append_to_current()
-                while self.next in digits and self.next:
-                    self.append_to_current()
-                self.set_token(TokenType.Float)
-            else:
-                self.set_token(TokenType.Dot)
-        elif self.current == '=':
-            if self.next == '=':
-                self.append_to_current()
-                self.set_token(TokenType.Equal)
-            else:
-                self.set_token(TokenType.Assignment)
-        elif self.current == '!':
-            if self.next == '=':
-                self.append_to_current()
-                self.set_token(TokenType.NotEqual)
-            else:
-                self.set_token(TokenType.Error, value=TokenType.NotEqual)
-        elif self.current == '>':
-            if self.next == '=':
-                self.append_to_current()
-                self.set_token(TokenType.GreaterThanOrEqual)
-            else:
-                self.set_token(TokenType.GreaterThan)
-        elif self.current == '<':
-            if self.next == '=':
-                self.append_to_current()
-                self.set_token(TokenType.LessThanOrEqual)
-            else:
-                self.set_token(TokenType.LessThan)
+        self.skip_while(self.WHITESPACE + self.INDENT)
 
-        elif self.current == '+':
-            if self.next == '=':
-                self.append_to_current()
-                self.set_token(TokenType.PlusAssign)
+        self.append()
+
+        if self.is_eof():
+            if self.indents:
+                dedent = self.indents.pop()
+                self.new_token(token_type=TokenType.Dedent, value=dedent)
             else:
-                self.set_token(TokenType.Plus)
-        elif self.current == '-':
-            if self.next == '=':
-                self.append_to_current()
-                self.set_token(TokenType.MinusAssign)
+                self.new_token(token_type=TokenType.EOF)
+            return next_token
+
+        if self.match('\n'):
+            self.new_token(token_type=TokenType.Newline, value=self.discard())
+        elif self.match('\r'):
+            if self.match_next('\n'):
+                self.append()
+            self.new_token(token_type=TokenType.Newline, value=self.discard())
+
+        elif self.match('+'):
+            if self.match_next('='):
+                self.append()
+                self.new_token(token_type=TokenType.PlusAssign, value=self.discard())
             else:
-                self.set_token(TokenType.Minus)
-        elif self.current == '*':
-            if self.next == '*':
-                self.append_to_current()
-                if self.next == '=':
-                    self.append_to_current()
-                    self.set_token(TokenType.ExponentAssign)
+                self.new_token(token_type=TokenType.Plus, value=self.discard())
+        elif self.match('-'):
+            if self.match_next('='):
+                self.append()
+                self.new_token(token_type=TokenType.MinusAssign, value=self.discard())
+            else:
+                self.new_token(token_type=TokenType.Minus, value=self.discard())
+        elif self.match('*'):
+            if self.match_next('='):
+                self.append()
+                self.new_token(token_type=TokenType.MultiplyAssign, value=self.discard())
+            elif self.match_next('*'):
+                self.append()
+                if self.match_next('='):
+                    self.append()
+                    self.new_token(token_type=TokenType.ExponentAssign, value=self.discard())
                 else:
-                    self.set_token(TokenType.Exponent)
-            elif self.next == '=':
-                self.append_to_current()
-                self.set_token(TokenType.MultiplyAssign)
+                    self.new_token(token_type=TokenType.Exponent, value=self.discard())
             else:
-                self.set_token(TokenType.Multiply)
-        elif self.current == '/':
-            if self.next == '=':
-                self.append_to_current()
-                self.set_token(TokenType.DivideAssign)
+                self.new_token(token_type=TokenType.Multiply, value=self.discard())
+        elif self.match('/'):
+            if self.match_next('='):
+                self.append()
+                self.new_token(token_type=TokenType.DivideAssign, value=self.discard())
             else:
-                self.set_token(TokenType.Divide)
-        elif self.current == '%':
-            if self.next == '=':
-                self.append_to_current()
-                self.set_token(TokenType.ModuloAssign)
+                self.new_token(token_type=TokenType.Divide, value=self.discard())
+        elif self.match('%'):
+            if self.match_next('='):
+                self.append()
+                self.new_token(token_type=TokenType.ModuloAssign, value=self.discard())
             else:
-                self.set_token(TokenType.Modulo)
+                self.new_token(token_type=TokenType.Modulo, value=self.discard())
 
-        elif self.current == ':':
-            self.set_token(TokenType.Colon)
-        elif self.current == ',':
-            self.set_token(TokenType.Comma)
-
-        elif self.current == '[':
-            self.brackets.append(self.current)
-            self.set_token(TokenType.LSquare)
-        elif self.current == ']':
-            try:
-                if self.brackets[-1] != '[':
-                    self.set_token(TokenType.Error, value=TokenType.RSquare)
-                self.brackets.pop()
-                self.set_token(TokenType.RSquare)
-            except IndexError:
-                self.set_token(TokenType.Error, value=TokenType.RSquare)
-        elif self.current == '{':
-            self.brackets.append(self.current)
-            self.set_token(TokenType.LBrace)
-        elif self.current == '}':
-            try:
-                if self.brackets[-1] != '{':
-                    self.set_token(TokenType.Error, value=TokenType.RBrace)
-                self.brackets.pop()
-                self.set_token(TokenType.RBrace)
-            except IndexError:
-                self.set_token(TokenType.Error, value=TokenType.RBrace)
-        elif self.current == '(':
-            self.brackets.append(self.current)
-            self.set_token(TokenType.LParen)
-        elif self.current == ')':
-            try:
-                if self.brackets[-1] != '(':
-                    self.set_token(TokenType.Error, value=TokenType.RParen)
-                self.brackets.pop()
-                self.set_token(TokenType.RParen)
-            except IndexError:
-                self.set_token(TokenType.Error, value=TokenType.RParen)
-
-        elif self.current:
-            while self.next and self.next not in RESERVED_CHARACTERS:
-                self.append_to_current()
-
-            if self.current == 'func':
-                self.set_token(TokenType.Function)
-            elif self.current == 'struct':
-                self.set_token(TokenType.Struct)
-            elif self.current == 'if':
-                self.set_token(TokenType.If)
-            elif self.current == 'elif':
-                self.set_token(TokenType.ElseIf)
-            elif self.current == 'else':
-                self.set_token(TokenType.Else)
-            elif self.current == 'while':
-                self.set_token(TokenType.While)
-            elif self.current == 'for':
-                self.set_token(TokenType.ForEach)
-            elif self.current == 'and':
-                self.set_token(TokenType.And)
-            elif self.current == 'or':
-                self.set_token(TokenType.Or)
-            elif self.current == 'not':
-                self.set_token(TokenType.Not)
-            elif self.current == 'true':
-                self.set_token(TokenType.True_)
-            elif self.current == 'false':
-                self.set_token(TokenType.False_)
+        elif self.match('='):
+            if self.match_next('='):
+                self.append()
+                self.new_token(token_type=TokenType.Equal, value=self.discard())
             else:
-                self.set_token(TokenType.Identifier)
+                self.new_token(token_type=TokenType.Assignment, value=self.discard())
+        elif self.match('!'):
+            if self.match_next('='):
+                self.append()
+                self.new_token(token_type=TokenType.NotEqual, value=self.discard())
+            else:
+                self.new_token(token_type=TokenType.Error, value=self.consume())
+        elif self.match('<'):
+            if self.match_next('='):
+                self.append()
+                self.new_token(token_type=TokenType.LessThanOrEqual, value=self.discard())
+            else:
+                self.new_token(token_type=TokenType.LessThan, value=self.discard())
+        elif self.match('>'):
+            if self.match_next('='):
+                self.append()
+                self.new_token(token_type=TokenType.GreaterThanOrEqual, value=self.discard())
+            else:
+                self.new_token(token_type=TokenType.GreaterThan, value=self.discard())
+
+        elif self.match('.'):
+            if self.next_contains(digits):
+                self.append_while(digits)
+                self.new_token(token_type=TokenType.Float, value=float(self.consume()))
+            else:
+                self.new_token(token_type=TokenType.Dot, value=self.discard())
+        elif self.match(':'):
+            self.new_token(
+                token_type=TokenType.Colon, value=self.discard()
+            )
+        elif self.match(','):
+            self.new_token(
+                token_type=TokenType.Comma, value=self.discard()
+            )
+
+        elif self.match('('):
+            self.push_bracket(TokenType.LParen)
+            self.discard()
+        elif self.match('['):
+            self.push_bracket(TokenType.LSquare)
+            self.discard()
+        elif self.match('{'):
+            self.push_bracket(TokenType.LBrace)
+            self.discard()
+
+        elif self.match(')'):
+            self.pop_bracket(TokenType.LParen, TokenType.RParen)
+            self.discard()
+        elif self.match(']'):
+            self.pop_bracket(TokenType.LSquare, TokenType.RSquare)
+            self.discard()
+        elif self.match('}'):
+            self.pop_bracket(TokenType.LBrace, TokenType.RBrace)
+            self.discard()
+
+        elif self.contains(digits):
+            self.append_while(digits)
+            if self.match_next('.'):
+                self.append()
+                self.append_while(digits)
+                self.new_token(
+                    TokenType.Float,
+                    float(self.consume())
+                )
+            else:
+                self.new_token(
+                    TokenType.Integer,
+                    int(self.consume())
+                )
+
         else:
-            self.set_token(TokenType.Error)
+            self.append_while_not(self.RESERVED_CHARACTERS)
+
+            if self.match('func'):
+                self.new_token(token_type=TokenType.Function, value=self.consume())
+            elif self.match('struct'):
+                self.new_token(token_type=TokenType.Struct, value=self.consume())
+            elif self.match('if'):
+                self.new_token(token_type=TokenType.If, value=self.consume())
+            elif self.match('elif'):
+                self.new_token(token_type=TokenType.ElseIf, value=self.consume())
+            elif self.match('else'):
+                self.new_token(token_type=TokenType.Else, value=self.consume())
+            elif self.match('while'):
+                self.new_token(token_type=TokenType.While, value=self.consume())
+            elif self.match('for'):
+                self.new_token(token_type=TokenType.ForEach, value=self.consume())
+            elif self.match('and'):
+                self.new_token(token_type=TokenType.And, value=self.consume())
+            elif self.match('or'):
+                self.new_token(token_type=TokenType.Or, value=self.consume())
+            elif self.match('not'):
+                self.new_token(token_type=TokenType.Not, value=self.consume())
+            elif self.match('true'):
+                self.new_token(token_type=TokenType.True_, value=self.consume())
+            elif self.match('false'):
+                self.new_token(token_type=TokenType.False_, value=self.consume())
+            else:
+                self.new_token(token_type=TokenType.Identifier, value=self.consume())
 
         return next_token

@@ -30,7 +30,7 @@ class Parser:
         return token
 
     def peek(self):
-        return self.lexer.next_token
+        return self.lexer.token
 
     def match(self, *token_types):
         for item in token_types:
