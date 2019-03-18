@@ -98,7 +98,8 @@ def test_emit_error():
     ['or', TokenType.Or],
     ['not', TokenType.Not],
     ['true', TokenType.True_],
-    ['false', TokenType.False_]
+    ['false', TokenType.False_],
+    ['return', TokenType.Return]
 ])
 def test_emit_keyword(test_input, expected):
     l = Lexer(test_input)
