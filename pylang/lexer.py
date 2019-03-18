@@ -31,6 +31,7 @@ class TokenType(Enum):
     Or = auto()                     # or
     True_ = auto()                  # true
     False_ = auto()                 # false
+    Return = auto()                 # return
 
     # Operators
     Dot = auto()                    # .
@@ -443,6 +444,8 @@ class Lexer:
                 self.new_token(token_type=TokenType.True_, value=self.consume())
             elif self.match('false'):
                 self.new_token(token_type=TokenType.False_, value=self.consume())
+            elif self.match('return'):
+                self.new_token(token_type=TokenType.Return, value=self.consume())
             else:
                 self.new_token(token_type=TokenType.Identifier, value=self.consume())
 
