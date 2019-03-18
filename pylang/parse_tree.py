@@ -1,84 +1,91 @@
 #!/usr/bin/env python3
 
-from typing import List
+from dataclasses import dataclass
+from typing import Sequence
 
-
-class Start:
-    def __init__(self, *functions):
-        self.functions: List[Function] = functions
-
-
-class Function:
-    def __init__(self, definition, block):
-        self.definition = definition
-        self.block = block
-
-
-class FunctionDecl:
-    def __init__(self, name, parameters, return_type):
-        self.name = name
-        self.parameters = parameters
-        self.return_type = return_type
-
-
-class Block:
-    def __init__(self, *statements):
-        self.statements: List[Statement] = statements
-
-
-class Statement:
-    def __init__(self, expression):
-        self.expression: Expression = expression
+from .lexer import Token
 
 
 class Expression:
     pass
 
 
+@dataclass
 class BinaryExpression(Expression):
-    def __init__(self, left, operator, right):
-        self.left = left
-        self.operator = operator
-        self.right = right
+    left: Expression
+    operator: Token
+    right: Expression
 
 
+@dataclass
 class AssignmentExpression(BinaryExpression):
-    def __init__(self, left, operator, right):
-        super().__init__(left, operator, right)
+    pass
 
 
+@dataclass
 class SumExpression(BinaryExpression):
-    def __init__(self, left, operator, right):
-        super().__init__(left, operator, right)
+    pass
 
 
+@dataclass
 class ProductExpression(BinaryExpression):
-    def __init__(self, left, operator, right):
-        super().__init__(left, operator, right)
+    pass
 
 
+@dataclass
 class UnaryExpression(Expression):
-    def __init__(self, operator, expression):
-        self.operator = operator
-        self.expression = expression
+    operator: Token
+    expression: Expression
 
 
+@dataclass
+class Statement:
+    expression: Expression
+
+
+@dataclass
+class Block:
+    statements: Sequence[Statement]
+
+
+@dataclass
+class FunctionDecl:
+    name: Token
+    parameters: Sequence[Token]
+    return_type: Token
+
+
+@dataclass
+class Function:
+    definition: FunctionDecl
+    block: Block
+
+
+@dataclass
+class Start:
+    functions: Sequence[Function]
+
+
+@dataclass
 class Atom:
-    def __init__(self, value):
-        self.value = value
+    value: Token
 
 
+@dataclass
 class Identifier(Atom):
     pass
 
 
+@dataclass
 class Boolean(Atom):
     pass
 
 
+@dataclass
 class Integer(Atom):
     pass
 
 
+@dataclass
 class Float(Atom):
     pass
