@@ -12,8 +12,7 @@ class TokenType(Enum):
 
     Newline = auto()
 
-    Integer = auto()
-    Float = auto()                  # 4.2 or .42
+    Digits = auto()
     String = auto()
 
     Identifier = auto()
@@ -68,6 +67,7 @@ class TokenType(Enum):
 
     Colon = auto()
     Comma = auto()
+    Underscore = auto()
 
     EOF = auto()
 
@@ -368,19 +368,11 @@ class Lexer:
                 self.new_token(token_type=TokenType.GreaterThan, value=self.discard())
 
         elif self.match('.'):
-            if self.next_contains(digits):
-                self.append_while(digits)
-                self.new_token(token_type=TokenType.Float, value=float(self.consume()))
-            else:
-                self.new_token(token_type=TokenType.Dot, value=self.discard())
+            self.new_token(token_type=TokenType.Dot, value=self.discard())
         elif self.match(':'):
-            self.new_token(
-                token_type=TokenType.Colon, value=self.discard()
-            )
+            self.new_token(token_type=TokenType.Colon, value=self.discard())
         elif self.match(','):
-            self.new_token(
-                token_type=TokenType.Comma, value=self.discard()
-            )
+            self.new_token(token_type=TokenType.Comma, value=self.discard())
 
         elif self.match('('):
             self.push_bracket(TokenType.LParen)
@@ -404,18 +396,10 @@ class Lexer:
 
         elif self.contains(digits):
             self.append_while(digits)
-            if self.match_next('.'):
-                self.append()
+            while self.match_next('_'):
+                self.advance()
                 self.append_while(digits)
-                self.new_token(
-                    TokenType.Float,
-                    float(self.consume())
-                )
-            else:
-                self.new_token(
-                    TokenType.Integer,
-                    int(self.consume())
-                )
+            self.new_token(TokenType.Digits, int(self.consume()))
 
         else:
             self.append_while_not(self.RESERVED_CHARACTERS)

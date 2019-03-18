@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .lexer import TokenType
-from .parse_tree import Start, FunctionDecl, Function, Boolean, Integer, Float, Identifier, UnaryExpression, ProductExpression, \
+from .parse_tree import FunctionDecl, Function, Boolean, Integer, Float, Identifier, UnaryExpression, ProductExpression, \
     SumExpression, AssignmentExpression
 
 
@@ -227,20 +227,36 @@ class Parser:
             raise UnexpectedToken
 
     def integer(self):
-        if self.token.token_type == TokenType.Integer:
-            node = Integer(value=self.token.value)
+        if self.token.token_type == TokenType.Digits:
+            node = Integer(value=self.token)
             self.advance()
+
             return node
         else:
             raise UnexpectedToken
 
     def float(self):
-        if self.token.token_type == TokenType.Float:
-            node = Float(self.token.value)
-            self.advance()
-            return node
+        token = self.token
+        if self.token.token_type == TokenType.Digits:
+            if self.peek().token_type == TokenType.Dot:
+                self.advance()
+                if self.peek().token_type == TokenType.Digits:
+                    self.advance()
+                    token.value = float(str(token.value) + '.' + str(self.token.value))
+                    self.advance()
+                else:
+                    raise UnexpectedToken
+            else:
+                raise UnexpectedToken
+        elif self.token.token_type == TokenType.Dot:
+            if self.peek().token_type == TokenType.Digits:
+                self.advance()
+                token.value = float("0." + str(self.token.value))
+                self.advance()
         else:
             raise UnexpectedToken
+
+        return Float(value=token)
 
     def identifier(self):
         if self.token.token_type == TokenType.Identifier:

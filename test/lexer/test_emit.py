@@ -65,17 +65,33 @@ def test_emit_brackets(test_input, l_token, r_token):
     assert r_token == l.emit().token_type
 
 
-@pytest.mark.parametrize('test_input,expected', [
-    ['42', TokenType.Integer],
-    ['42.42', TokenType.Float],
-    ['.42', TokenType.Float]
+@pytest.mark.parametrize('test_input,token_type,value', [
+    ['42', TokenType.Digits, 42]
 ])
-def test_emit_numbers(test_input, expected):
+def test_emit_integer(test_input, token_type, value):
     l = Lexer(test_input)
     l.emit()
     token = l.emit()
 
-    assert expected == token.token_type
+    assert token_type == token.token_type
+    assert value == token.value
+
+
+# @pytest.mark.parametrize('test_input,token_type,value', [
+#     ['42.42', TokenType.Float, 42.42],
+#     ['4_2.4_2', TokenType.Float, 42.42],
+#     ['4_2_.4_2_', TokenType.Float, 42.42],
+#     ['.42', TokenType.Float, 0.42],
+#     ['.4_2', TokenType.Float, 0.42],
+#     ['.4_2_', TokenType.Float, 0.42]
+# ])
+# def test_emit_float(test_input, token_type, value):
+#     l = Lexer(test_input)
+#     l.emit()
+#     token = l.emit()
+#
+#     assert token_type == token.token_type
+#     assert pytest.approx(value) == token.value
 
 
 def test_emit_error():

@@ -254,11 +254,11 @@ def test_new_token():
     l.append()
     l.append()
     l.new_token(
-        token_type=TokenType.Integer,
+        token_type=TokenType.Digits,
         value=l.consume()
     )
 
-    assert TokenType.Integer == l.token.token_type
+    assert TokenType.Digits == l.token.token_type
     assert '123' == l.token.value
     assert Position(
         index=0,

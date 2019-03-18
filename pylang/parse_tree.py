@@ -62,11 +62,6 @@ class Function:
 
 
 @dataclass
-class Start:
-    functions: Sequence[Function]
-
-
-@dataclass
 class Atom:
     value: Token
 
