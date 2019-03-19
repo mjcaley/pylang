@@ -3,7 +3,7 @@
 import pytest
 
 from pylang.lexer import Lexer
-from pylang.recursive_descent import Parser, UnexpectedToken
+from pylang.recursive_descent import Parser, UnexpectedTokenError
 from pylang.parse_tree import BinaryExpression, Float, Integer
 
 
@@ -27,5 +27,5 @@ def test_statement_without_newline():
     l.emit()
     p = Parser(l)
 
-    with pytest.raises(UnexpectedToken):
+    with pytest.raises(UnexpectedTokenError):
         p.statement()

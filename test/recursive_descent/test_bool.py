@@ -3,7 +3,7 @@
 import pytest
 
 from pylang.lexer import Lexer
-from pylang.recursive_descent import Parser, UnexpectedToken
+from pylang.recursive_descent import Parser, UnexpectedTokenError
 
 
 @pytest.mark.parametrize('test_input,expected', [
@@ -25,5 +25,5 @@ def test_bool_exception():
     l.emit()
     p = Parser(lexer=l)
 
-    with pytest.raises(UnexpectedToken):
+    with pytest.raises(UnexpectedTokenError):
         p.bool()

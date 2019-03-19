@@ -3,7 +3,7 @@
 import pytest
 
 from pylang.lexer import Lexer
-from pylang.recursive_descent import Parser, UnexpectedToken
+from pylang.recursive_descent import Parser, UnexpectedTokenError
 from pylang.parse_tree import Boolean, Float, Identifier, Integer
 
 
@@ -41,5 +41,5 @@ def test_keywords(test_input):
     l.emit()
     p = Parser(lexer=l)
 
-    with pytest.raises(UnexpectedToken):
+    with pytest.raises(UnexpectedTokenError):
         p.atom()

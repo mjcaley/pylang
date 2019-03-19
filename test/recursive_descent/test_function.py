@@ -3,7 +3,7 @@
 import pytest
 
 from pylang.lexer import Lexer
-from pylang.recursive_descent import Parser, UnexpectedToken
+from pylang.recursive_descent import Parser, UnexpectedTokenError
 from pylang.parse_tree import Function, FunctionDecl
 
 
@@ -31,5 +31,5 @@ def test_function_raises(test_input):
     l.emit()
     p = Parser(lexer=l)
 
-    with pytest.raises(UnexpectedToken):
+    with pytest.raises(UnexpectedTokenError):
         p.function()

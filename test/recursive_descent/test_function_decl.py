@@ -3,7 +3,7 @@
 import pytest
 
 from pylang.lexer import Lexer
-from pylang.recursive_descent import Parser, UnexpectedToken
+from pylang.recursive_descent import Parser, UnexpectedTokenError
 from pylang.parse_tree import FunctionDecl
 
 

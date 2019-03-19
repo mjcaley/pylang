@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .lexer import TokenType
-from .parse_tree import FunctionDecl, Function, Boolean, Integer, Float, Identifier, UnaryExpression, ProductExpression, \
+from .parse_tree import Block, FunctionDecl, Function, Boolean, Integer, Float, Identifier, UnaryExpression, ProductExpression, \
     SumExpression, AssignmentExpression
 
 
@@ -9,8 +9,12 @@ class ParserException(Exception):
     pass
 
 
-class UnexpectedToken(ParserException):
-    pass
+class UnexpectedTokenError(ParserException):
+    def __init__(self, expected=None, received=None, position=None, message=None):
+        self.expected = expected
+        self.received = received
+        self.position = position
+        self.message = message
 
 
 class Parser:
@@ -18,6 +22,24 @@ class Parser:
         self.lexer = lexer
         self.errors = []
         self.token = self.lexer.emit()
+
+    def current(self):
+        return self.token
+
+    def next(self):
+        return self.lexer.token
+
+    def match_current(self, token_type):
+        return self.current().token_type == token_type
+
+    def match_next(self, token_type):
+        return self.next().token_type == token_type
+
+    def match(self, current_type, next_type=None):
+        return all([
+            self.match_current(current_type),
+            True if next_type is None else self.match_next(next_type)
+        ])
 
     def advance(self):
         self.token = self.lexer.emit()
@@ -29,23 +51,31 @@ class Parser:
 
         return token
 
-    def peek(self):
-        return self.lexer.token
+    def consume_if(self, token_type):
+        if self.match(token_type):
+            return self.consume()
+        else:
+            return None
 
-    def match(self, *token_types):
-        for item in token_types:
-            pass
-            # TODO: finish
+    def consume_try(self, token_type):
+        if self.match(token_type):
+            return self.consume()
+        else:
+            raise UnexpectedTokenError(
+                expected=token_type,
+                received=self.current().token_type,
+                position=self.current().position,
+                message=f'Found {self.current().token_type}:{self.current().token_type.value} '
+                        f'and expected {token_type}{token_type.value} at '
+                        f'position: {self.current().position}'
+            )
 
     def eof(self):
-        return self.token.token_type == TokenType.EOF
-
-    def report_error(self, message, token):
-        self.errors.append(ParserException(message, token))
+        return self.match(TokenType.EOF)
 
     def recover(self, skip_to_next_token=TokenType.Newline):
-        while self.peek().token_type != skip_to_next_token and \
-                self.peek().token_type != TokenType.EOF:
+        while not self.match_next(skip_to_next_token) and \
+                not self.eof():
             self.advance()
 
     def parse(self):
@@ -57,16 +87,18 @@ class Parser:
     def start(self):
         functions = []
 
-        if self.token.token_type != TokenType.Start:
-            raise ParserException('Could not find Start token')
+        if self.token.token_type != TokenType.Indent:
+            raise UnexpectedTokenError('Could not find Start token')
+        self.consume()
 
-        while not self.eof():
+        while not self.match(TokenType.Dedent):
             try:
                 functions.append(self.function())
-            except UnexpectedToken:
+            except UnexpectedTokenError:
                 self.recover(TokenType.Function)
+        self.consume()
 
-        return Start(*functions)
+        return functions
 
     def parameters(self):
         params = [self.identifier()]
@@ -78,28 +110,18 @@ class Parser:
         return params
 
     def function_decl(self):
-        if self.token.token_type != TokenType.Function:
-            raise UnexpectedToken
-        self.advance()
-
+        self.consume_try(TokenType.Function)
         name = self.identifier()
 
-        if self.token.token_type != TokenType.LParen:
-            raise UnexpectedToken
-        self.advance()
-
+        self.consume_try(TokenType.LParen)
         parameters = []
         try:
             parameters = self.parameters()
-        except UnexpectedToken:
+        except UnexpectedTokenError:
             pass
+        self.consume_try(TokenType.RParen)
 
-        if self.token.token_type != TokenType.RParen:
-            raise UnexpectedToken
-        self.advance()
-
-        if self.token.token_type == TokenType.Colon:
-            self.advance()
+        if self.consume_if(TokenType.Colon):
             return_type = self.identifier()
             return FunctionDecl(name, parameters, return_type)
         else:
@@ -109,10 +131,10 @@ class Parser:
         definition = self.function_decl()
 
         if self.token.token_type != TokenType.Assignment:
-            raise UnexpectedToken
+            raise UnexpectedTokenError
         self.advance()
         if self.token.token_type != TokenType.Newline:
-            raise UnexpectedToken
+            raise UnexpectedTokenError
         self.advance()
 
         statements = self.block()
@@ -123,7 +145,7 @@ class Parser:
         statements = []
 
         if self.token.token_type != TokenType.Indent:
-            raise UnexpectedToken
+            raise UnexpectedTokenError
         self.advance()
         while self.token.token_type != TokenType.Dedent and \
                 self.token.token_type != TokenType.EOF:
@@ -138,7 +160,7 @@ class Parser:
         if self.token.token_type == TokenType.Newline:
             self.advance()
         else:
-            raise UnexpectedToken
+            raise UnexpectedTokenError
         return expr
 
     def expression(self):
@@ -177,9 +199,8 @@ class Parser:
             return left
 
     def unary_expr(self):
-        if self.token.token_type == TokenType.Minus:
-            operation = self.token
-            self.advance()
+        operation = self.consume_if(TokenType.Minus)
+        if operation:
             expression = self.expression()
             return UnaryExpression(operation, expression)
         else:
@@ -188,22 +209,22 @@ class Parser:
     def atom(self):
         try:
             return self.float()
-        except UnexpectedToken:
+        except UnexpectedTokenError:
             pass
 
         try:
             return self.integer()
-        except UnexpectedToken:
+        except UnexpectedTokenError:
             pass
 
         try:
             return self.bool()
-        except UnexpectedToken:
+        except UnexpectedTokenError:
             pass
 
         try:
             return self.identifier()
-        except UnexpectedToken:
+        except UnexpectedTokenError:
             pass
 
         if self.token.token_type == TokenType.LParen:
@@ -212,9 +233,9 @@ class Parser:
             if self.token.token_type == TokenType.RParen:
                 return expr
             else:
-                raise UnexpectedToken
+                raise UnexpectedTokenError
 
-        raise UnexpectedToken
+        raise UnexpectedTokenError
 
     def bool(self):
         if self.token.token_type == TokenType.True_:
@@ -224,39 +245,27 @@ class Parser:
             self.advance()
             return Boolean(False)
         else:
-            raise UnexpectedToken
+            raise UnexpectedTokenError
 
     def integer(self):
-        if self.token.token_type == TokenType.Digits:
-            node = Integer(value=self.token)
-            self.advance()
-
-            return node
-        else:
-            raise UnexpectedToken
+        return Integer(value=self.consume_try(TokenType.Digits))
 
     def float(self):
-        token = self.token
-        if self.token.token_type == TokenType.Digits:
-            if self.peek().token_type == TokenType.Dot:
-                self.advance()
-                if self.peek().token_type == TokenType.Digits:
-                    self.advance()
-                    token.value = float(str(token.value) + '.' + str(self.token.value))
-                    self.advance()
-                else:
-                    raise UnexpectedToken
-            else:
-                raise UnexpectedToken
-        elif self.token.token_type == TokenType.Dot:
-            if self.peek().token_type == TokenType.Digits:
-                self.advance()
-                token.value = float("0." + str(self.token.value))
-                self.advance()
-        else:
-            raise UnexpectedToken
+        if self.match(TokenType.Dot, TokenType.Digits):
+            start = self.consume()
+            right = self.consume()
+            start.value = float('0.' + str(right.value))
 
-        return Float(value=token)
+            return Float(value=start)
+        elif self.match(TokenType.Digits, TokenType.Dot):
+            start = self.consume()
+            self.consume()
+            right = self.consume_try(TokenType.Digits)
+            start.value = float(str(start.value) + '.' + str(right.value))
+
+            return Float(value=start)
+        else:
+            raise UnexpectedTokenError(expected=TokenType.Digits, received=self.current())
 
     def identifier(self):
         if self.token.token_type == TokenType.Identifier:
@@ -264,4 +273,4 @@ class Parser:
             self.advance()
             return node
         else:
-            raise UnexpectedToken
+            raise UnexpectedTokenError
