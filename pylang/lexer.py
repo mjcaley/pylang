@@ -18,56 +18,55 @@ class TokenType(Enum):
     Identifier = auto()
 
     # Keywords
-    Function = auto()               # func
-    Struct = auto()                 # struct
-    If = auto()                     # if
-    ElseIf = auto()                 # elif
-    Else = auto()                   # else
-    While = auto()                  # while
-    ForEach = auto()                # for
-    And = auto()                    # and
-    Not = auto()                    # not
-    Or = auto()                     # or
-    True_ = auto()                  # true
-    False_ = auto()                 # false
-    Return = auto()                 # return
+    Function = 'func'
+    Struct = 'struct'
+    If = 'if'
+    ElseIf = 'elif'
+    Else = 'else'
+    While = 'while'
+    ForEach = 'for'
+    And = 'and'
+    Not = 'not'
+    Or = 'or'
+    True_ = 'true'
+    False_ = 'false'
+    Return = 'return'
 
     # Operators
-    Dot = auto()                    # .
-    Assignment = auto()             # =
+    Dot = '.'
+    Assignment = '='
 
     # Arithmetic operators
-    Plus = auto()                   # +
-    PlusAssign = auto()             # +=
-    Minus = auto()                  # -
-    MinusAssign = auto()            # -=
-    Multiply = auto()               # *
-    MultiplyAssign = auto()         # *=
-    Divide = auto()                 # /
-    DivideAssign = auto()           # /=
-    Modulo = auto()                 # %
-    ModuloAssign = auto()           # %=
-    Exponent = auto()               # **
-    ExponentAssign = auto()         # **=
+    Plus = '+'
+    PlusAssign = '+='
+    Minus = '-'
+    MinusAssign = '-='
+    Multiply = '*'
+    MultiplyAssign = '*='
+    Divide = '/'
+    DivideAssign = '/='
+    Modulo = '%'
+    ModuloAssign = '%='
+    Exponent = '**'
+    ExponentAssign = '**='
 
     # Comparison operators
-    Equal = auto()                  # ==
-    NotEqual = auto()               # !=
-    LessThan = auto()               # <
-    GreaterThan = auto()            # >
-    LessThanOrEqual = auto()        # <=
-    GreaterThanOrEqual = auto()     # >=
+    Equal = '=='
+    NotEqual = '!='
+    LessThan = '<'
+    GreaterThan = '>'
+    LessThanOrEqual = '<='
+    GreaterThanOrEqual = '>='
 
-    LParen = auto()
-    RParen = auto()
-    LBrace = auto()
-    RBrace = auto()
-    LSquare = auto()
-    RSquare = auto()
+    LParen = '('
+    RParen = ')'
+    LBrace = '{'
+    RBrace = '}'
+    LSquare = '['
+    RSquare = ']'
 
-    Colon = auto()
-    Comma = auto()
-    Underscore = auto()
+    Colon = ':'
+    Comma = ','
 
     EOF = auto()
 
