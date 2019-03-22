@@ -17,7 +17,7 @@ def test_bool(test_input, expected):
 
     result = p.bool()
 
-    assert expected is result.value
+    assert expected is result.value.value
 
 
 def test_bool_exception():

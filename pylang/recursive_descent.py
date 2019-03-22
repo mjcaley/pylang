@@ -236,12 +236,10 @@ class Parser:
         raise UnexpectedTokenError
 
     def bool(self):
-        if self.consume_if(TokenType.True_):
-            return Boolean(True)
-        elif self.consume_if(TokenType.False_):
-            return Boolean(False)
-        else:
-            raise UnexpectedTokenError(expected=[TokenType.True_, TokenType.False_], received=self.current())
+        try:
+            return Boolean(self.consume_try(TokenType.True_))
+        except UnexpectedTokenError:
+            return Boolean(self.consume_try(TokenType.False_))
 
     def integer(self):
         return Integer(value=self.consume_try(TokenType.Digits))

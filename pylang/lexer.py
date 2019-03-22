@@ -424,9 +424,11 @@ class Lexer:
             elif self.match('not'):
                 self.new_token(token_type=TokenType.Not, value=self.consume())
             elif self.match('true'):
-                self.new_token(token_type=TokenType.True_, value=self.consume())
+                self.consume()
+                self.new_token(token_type=TokenType.True_, value=True)
             elif self.match('false'):
-                self.new_token(token_type=TokenType.False_, value=self.consume())
+                self.consume()
+                self.new_token(token_type=TokenType.False_, value=False)
             elif self.match('return'):
                 self.new_token(token_type=TokenType.Return, value=self.consume())
             else:
