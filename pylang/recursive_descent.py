@@ -178,10 +178,9 @@ class Parser:
 
     def sum_expr(self):
         left = self.product_expr()
-        if self.token.token_type == TokenType.Plus or \
-                self.token.token_type == TokenType.Minus:
-            operator = self.token
-            self.advance()
+
+        operator = self.consume_if(TokenType.Plus) or self.consume_if(TokenType.Minus)
+        if operator:
             right = self.expression()
             return SumExpression(left, operator, right)
         else:
@@ -189,8 +188,7 @@ class Parser:
 
     def product_expr(self):
         left = self.unary_expr()
-        if self.token.token_type == TokenType.Multiply or \
-                self.token.token_type == TokenType.Divide:
+        if self.match(TokenType.Multiply) or self.match(TokenType.Divide):
             operator = self.token
             self.advance()
             right = self.expression()
@@ -238,14 +236,12 @@ class Parser:
         raise UnexpectedTokenError
 
     def bool(self):
-        if self.token.token_type == TokenType.True_:
-            self.advance()
+        if self.consume_if(TokenType.True_):
             return Boolean(True)
-        elif self.token.token_type == TokenType.False_:
-            self.advance()
+        elif self.consume_if(TokenType.False_):
             return Boolean(False)
         else:
-            raise UnexpectedTokenError
+            raise UnexpectedTokenError(expected=[TokenType.True_, TokenType.False_], received=self.current())
 
     def integer(self):
         return Integer(value=self.consume_try(TokenType.Digits))
@@ -268,9 +264,4 @@ class Parser:
             raise UnexpectedTokenError(expected=TokenType.Digits, received=self.current())
 
     def identifier(self):
-        if self.token.token_type == TokenType.Identifier:
-            node = Identifier(self.token.value)
-            self.advance()
-            return node
-        else:
-            raise UnexpectedTokenError
+        return Identifier(value=self.consume_try(TokenType.Identifier))

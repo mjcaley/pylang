@@ -23,7 +23,7 @@ def test_parameters(test_input, name, num_params, return_type):
     result = p.function_decl()
 
     assert isinstance(result, FunctionDecl)
-    assert name == result.name.value
+    assert name == result.name.value.value
     assert num_params == len(result.parameters)
     if return_type:
-        assert return_type == result.return_type.value
+        assert result.return_type.value.value == return_type

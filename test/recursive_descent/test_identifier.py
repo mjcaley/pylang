@@ -22,7 +22,7 @@ def test_identifier(test_input):
     result = p.identifier()
 
     assert isinstance(result, Identifier)
-    assert test_input == result.value
+    assert test_input == result.value.value
 
 
 @pytest.mark.parametrize('test_input', [

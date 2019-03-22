@@ -14,7 +14,7 @@ from pylang.parse_tree import Boolean, Float, Identifier, Integer
     ['true', Boolean],
     ['(42)', Integer]
 ])
-def test_identifier(test_input, expected):
+def test_atom_types(test_input, expected):
     l = Lexer(test_input)
     l.emit()
     p = Parser(lexer=l)
