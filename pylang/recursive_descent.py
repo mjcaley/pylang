@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .lexer import TokenType
-from .parse_tree import Block, FunctionDecl, Function, Boolean, Integer, Float, Identifier, UnaryExpression, ProductExpression, \
+from .parse_tree import FunctionDecl, Function, Boolean, Integer, Float, Identifier, UnaryExpression, ProductExpression, \
     SumExpression, AssignmentExpression
 
 
@@ -87,24 +87,21 @@ class Parser:
     def start(self):
         functions = []
 
-        if self.token.token_type != TokenType.Indent:
-            raise UnexpectedTokenError('Could not find Start token')
-        self.consume()
+        self.consume_try(TokenType.Indent)
 
         while not self.match(TokenType.Dedent):
             try:
                 functions.append(self.function())
             except UnexpectedTokenError:
                 self.recover(TokenType.Function)
-        self.consume()
+        self.consume_try(TokenType.Dedent)
 
         return functions
 
     def parameters(self):
         params = [self.identifier()]
 
-        while self.token.token_type == TokenType.Comma:
-            self.advance()
+        while self.consume_if(TokenType.Comma):
             params.append(self.identifier())
 
         return params
@@ -130,12 +127,8 @@ class Parser:
     def function(self):
         definition = self.function_decl()
 
-        if self.token.token_type != TokenType.Assignment:
-            raise UnexpectedTokenError
-        self.advance()
-        if self.token.token_type != TokenType.Newline:
-            raise UnexpectedTokenError
-        self.advance()
+        self.consume_try(TokenType.Assignment)
+        self.consume_try(TokenType.Newline)
 
         statements = self.block()
 
@@ -144,23 +137,18 @@ class Parser:
     def block(self):
         statements = []
 
-        if self.token.token_type != TokenType.Indent:
-            raise UnexpectedTokenError
-        self.advance()
-        while self.token.token_type != TokenType.Dedent and \
-                self.token.token_type != TokenType.EOF:
+        self.consume_try(TokenType.Indent)
+        while not self.match(TokenType.Dedent) and \
+                not self.match(TokenType.EOF):
             statements.append(self.statement())
-        if self.token.token_type == TokenType.Dedent:
-            self.advance()
+        self.consume_try(TokenType.Dedent)
 
         return statements
 
     def statement(self):
         expr = self.expression()
-        if self.token.token_type == TokenType.Newline:
-            self.advance()
-        else:
-            raise UnexpectedTokenError
+        self.consume_try(TokenType.Newline)
+
         return expr
 
     def expression(self):
@@ -168,9 +156,8 @@ class Parser:
 
     def assignment_expr(self):
         left = self.sum_expr()
-        if self.token.token_type == TokenType.Assignment:
-            operator = self.token
-            self.advance()
+        if self.match(TokenType.Assignment):
+            operator = self.consume()
             right = self.expression()
             return AssignmentExpression(left, operator, right)
         else:

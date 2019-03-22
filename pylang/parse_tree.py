@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from dataclasses import dataclass
-from typing import Sequence
+from typing import Optional, Sequence
 
 from .lexer import Token
 
@@ -44,24 +44,6 @@ class Statement:
 
 
 @dataclass
-class Block:
-    statements: Sequence[Statement]
-
-
-@dataclass
-class FunctionDecl:
-    name: Token
-    parameters: Sequence[Token]
-    return_type: Token
-
-
-@dataclass
-class Function:
-    definition: FunctionDecl
-    block: Block
-
-
-@dataclass
 class Atom:
     value: Token
 
@@ -84,3 +66,16 @@ class Integer(Atom):
 @dataclass
 class Float(Atom):
     pass
+
+
+@dataclass
+class FunctionDecl:
+    name: Identifier
+    parameters: Sequence[Token]
+    return_type: Optional[Identifier]
+
+
+@dataclass
+class Function:
+    definition: FunctionDecl
+    block: Sequence[Statement]
