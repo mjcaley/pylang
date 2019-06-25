@@ -138,6 +138,16 @@ class Lexer:
             value=0
         )
 
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        token = self.emit()
+        if token.token_type == TokenType.EOF:
+            raise StopIteration
+        else:
+            return token
+
     def advance(self):
         last = self.next
         self.next = self.data.read(1)

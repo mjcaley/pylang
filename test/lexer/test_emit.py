@@ -202,3 +202,13 @@ def test_eof(test_input, num_tokens):
         assert TokenType.EOF != l.emit()
 
     assert TokenType.EOF == l.emit().token_type
+
+
+def test_iterator():
+    l = Lexer('')
+    iterator = iter(l)
+
+    assert next(iterator).token_type == TokenType.Indent
+    assert next(iterator).token_type == TokenType.Dedent
+    with pytest.raises(StopIteration):
+        next(iterator)
