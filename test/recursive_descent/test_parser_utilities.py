@@ -15,14 +15,14 @@ def lexer_digits():
 def test_current(lexer_digits):
     p = Parser(lexer_digits)
 
-    assert p.current().token_type == TokenType.Indent
+    assert p.current.token_type == TokenType.Indent
 
 
 def test_next(lexer_digits):
     p = Parser(lexer_digits)
 
-    assert p.next().token_type == TokenType.Digits
-    assert p.next().value == 1
+    assert p.next.token_type == TokenType.Digits
+    assert p.next.value == 1
 
 
 def test_match_current(lexer_digits):
@@ -50,22 +50,22 @@ def test_advance(lexer_digits):
 
     assert token.token_type == TokenType.Digits
     assert token.value == 1
-    assert p.current() == token
+    assert p.current == token
 
 
 def test_consume(lexer_digits):
     p = Parser(lexer_digits)
 
-    first_token = p.current()
+    first_token = p.current
     next_token = p.consume()
 
     assert first_token == next_token
-    assert p.current() != next_token
+    assert p.current != next_token
 
 
 def test_consume_if_success(lexer_digits):
     p = Parser(lexer_digits)
-    current_token = p.current()
+    current_token = p.current
     token = p.consume_if(TokenType.Indent)
 
     assert current_token == token
@@ -73,7 +73,7 @@ def test_consume_if_success(lexer_digits):
 
 def test_consume_if_fail(lexer_digits):
     p = Parser(lexer_digits)
-    current_token = p.current()
+    current_token = p.current
     token = p.consume_if(TokenType.Dedent)
 
     assert current_token != token
@@ -81,7 +81,7 @@ def test_consume_if_fail(lexer_digits):
 
 def test_consume_try_success(lexer_digits):
     p = Parser(lexer_digits)
-    current_token = p.current()
+    current_token = p.current
     token = p.consume_try(TokenType.Indent)
 
     assert current_token == token

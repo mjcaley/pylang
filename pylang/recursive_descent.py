@@ -23,17 +23,19 @@ class Parser:
         self.errors = []
         self.token = self.lexer.emit()
 
+    @property
     def current(self):
         return self.token
 
+    @property
     def next(self):
         return self.lexer.token
 
     def match_current(self, token_type):
-        return self.current().token_type == token_type
+        return self.current.token_type == token_type
 
     def match_next(self, token_type):
-        return self.next().token_type == token_type
+        return self.next.token_type == token_type
 
     def match(self, current_type, next_type=None):
         return all([
@@ -63,11 +65,11 @@ class Parser:
         else:
             raise UnexpectedTokenError(
                 expected=token_type,
-                received=self.current().token_type,
-                position=self.current().position,
-                message=f'Found {self.current().token_type}:{self.current().token_type.value} '
+                received=self.current.token_type,
+                position=self.current.position,
+                message=f'Found {self.current.token_type}:{self.current.token_type.value} '
                         f'and expected {token_type}{token_type.value} at '
-                        f'position: {self.current().position}'
+                        f'position: {self.current.position}'
             )
 
     def eof(self):
@@ -246,7 +248,7 @@ class Parser:
 
             return Float(value=start)
         else:
-            raise UnexpectedTokenError(expected=TokenType.Digits, received=self.current())
+            raise UnexpectedTokenError(expected=TokenType.Digits, received=self.current)
 
     def identifier(self):
         return Identifier(value=self.consume_try(TokenType.Identifier))
