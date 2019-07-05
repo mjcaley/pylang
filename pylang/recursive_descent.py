@@ -21,7 +21,7 @@ class Parser:
     def __init__(self, lexer):
         self.lexer = lexer
         self.errors = []
-        self.token = self.lexer.emit()
+        self.token = next(self.lexer)
 
     @property
     def current(self):
@@ -44,7 +44,7 @@ class Parser:
         ])
 
     def advance(self):
-        self.token = self.lexer.emit()
+        self.token = next(self.lexer)
         return self.token
 
     def consume(self):

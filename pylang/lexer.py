@@ -167,6 +167,12 @@ class Lexer:
 
         return last
 
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        return self.emit()
+
     def append(self):
         if not self.current:
             self.current_position = self.next_position
