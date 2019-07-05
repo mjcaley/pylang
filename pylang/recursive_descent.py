@@ -19,17 +19,21 @@ class UnexpectedTokenError(ParserException):
 
 class Parser:
     def __init__(self, lexer):
-        self.lexer = lexer
+        self._lexer = iter(lexer)
         self.errors = []
-        self.token = next(self.lexer)
+        self._current = None
+        self._next = None
+
+        self.advance()
+        self.advance()
 
     @property
     def current(self):
-        return self.token
+        return self._current
 
     @property
     def next(self):
-        return self.lexer.token
+        return self._next
 
     def match_current(self, token_type):
         return self.current.token_type == token_type
@@ -44,14 +48,19 @@ class Parser:
         ])
 
     def advance(self):
-        self.token = next(self.lexer)
-        return self.token
+        self._current = self._next
+        try:
+            self._next = next(self._lexer)
+        except StopIteration:
+            pass
+
+        return self.current
 
     def consume(self):
-        token = self.token
+        current = self.current
         self.advance()
 
-        return token
+        return current
 
     def consume_if(self, token_type):
         if self.match(token_type):
@@ -178,7 +187,7 @@ class Parser:
     def product_expr(self):
         left = self.unary_expr()
         if self.match(TokenType.Multiply) or self.match(TokenType.Divide):
-            operator = self.token
+            operator = self._current
             self.advance()
             right = self.expression()
             return ProductExpression(left, operator, right)
@@ -214,10 +223,10 @@ class Parser:
         except UnexpectedTokenError:
             pass
 
-        if self.token.token_type == TokenType.LParen:
+        if self._current.token_type == TokenType.LParen:
             self.advance()
             expr = self.expression()
-            if self.token.token_type == TokenType.RParen:
+            if self._current.token_type == TokenType.RParen:
                 return expr
             else:
                 raise UnexpectedTokenError

@@ -2,14 +2,18 @@
 
 import pytest
 
-from pylang.lexer import TokenType
+from pylang.lexer import Token, TokenType, Position
 from pylang.recursive_descent import Parser, UnexpectedTokenError
 
 
 @pytest.fixture
 def lexer_digits():
-    from pylang.lexer import Lexer
-    return Lexer('1')
+    return [
+        Token(TokenType.Indent, Position(0, 1, 1)),
+        Token(TokenType.Digits, Position(1, 1, 2), 1),
+        Token(TokenType.Dedent, Position(2, 1, 3)),
+        Token(TokenType.EOF, Position(3, 2, 1))
+    ]
 
 
 def test_current(lexer_digits):
