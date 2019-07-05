@@ -83,6 +83,41 @@ def test_consume_if_fail(lexer_digits):
     assert current_token != token
 
 
+def test_consume_if2_success_one(lexer_digits):
+    match = lexer_digits[0].token_type
+    p = Parser(lexer_digits)
+    result = p.consume_if2(match)
+
+    assert result[0].token_type == match
+
+
+def test_consume_if2_success_multiple(lexer_digits):
+    match = [token.token_type for token in lexer_digits[:3]]
+    p = Parser(lexer_digits)
+    result = p.consume_if2(*match)
+
+    assert result[0] == lexer_digits[0]
+    assert result[1] == lexer_digits[1]
+    assert result[2] == lexer_digits[2]
+    assert len(result) == 3
+
+
+def test_consume_if2_fail_first(lexer_digits):
+    p = Parser(lexer_digits)
+    result = p.consume_if2(TokenType.EOF)
+
+    assert len(result) == 0
+
+
+def test_consume_if2_fail_partial(lexer_digits):
+    p = Parser(lexer_digits)
+    result = p.consume_if2(TokenType.Indent, TokenType.Digits, TokenType.Digits)
+
+    assert result[0] == lexer_digits[0]
+    assert result[1] == lexer_digits[1]
+    assert len(result) == 2
+
+
 def test_consume_try_success(lexer_digits):
     p = Parser(lexer_digits)
     current_token = p.current

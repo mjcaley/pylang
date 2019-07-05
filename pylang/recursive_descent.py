@@ -68,6 +68,17 @@ class Parser:
         else:
             return None
 
+    def consume_if2(self, *token_types):
+        tokens = []
+
+        for token_type in token_types:
+            if self.match_current(token_type):
+                tokens.append(self.consume())
+            else:
+                break
+
+        return tokens
+
     def consume_try(self, token_type):
         if self.match(token_type):
             return self.consume()
