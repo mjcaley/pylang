@@ -79,6 +79,24 @@ class Parser:
 
         return tokens
 
+    def consume_try2(self, *token_types):
+        tokens = []
+
+        for token_type in token_types:
+            if self.match_current(token_type):
+                tokens.append(self.consume())
+            else:
+                raise UnexpectedTokenError(
+                    expected=token_type,
+                    received=self.current.token_type,
+                    position=self.current.position,
+                    message=f'Found {self.current.token_type}:{self.current.token_type.value} '
+                            f'and expected {token_type}{token_type.value} at '
+                            f'position: {self.current.position}'
+                )
+
+        return tokens
+
     def consume_try(self, token_type):
         if self.match(token_type):
             return self.consume()

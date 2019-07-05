@@ -118,6 +118,36 @@ def test_consume_if2_fail_partial(lexer_digits):
     assert len(result) == 2
 
 
+def test_consume_try2_success_one(lexer_digits):
+    p = Parser(lexer_digits)
+    result = p.consume_try2(TokenType.Indent)
+
+    assert result[0] == lexer_digits[0]
+    assert len(result) == 1
+
+
+def test_consume_try2_success_multiple(lexer_digits):
+    p = Parser(lexer_digits)
+    result = p.consume_try2(TokenType.Indent, TokenType.Digits, TokenType.Dedent)
+
+    assert result[0] == lexer_digits[0]
+    assert result[1] == lexer_digits[1]
+    assert result[2] == lexer_digits[2]
+    assert len(result) == 3
+
+
+@pytest.mark.parametrize('test_input', [
+    [TokenType.EOF],
+    [TokenType.Indent, TokenType.EOF],
+    [TokenType.Indent, TokenType.Digits, TokenType.Dedent, TokenType.Indent],
+])
+def test_consume_try2_fails(test_input, lexer_digits):
+    p = Parser(lexer_digits)
+
+    with pytest.raises(UnexpectedTokenError):
+        p.consume_try2(*test_input)
+
+
 def test_consume_try_success(lexer_digits):
     p = Parser(lexer_digits)
     current_token = p.current
