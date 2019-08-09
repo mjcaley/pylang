@@ -36,9 +36,7 @@ def test_eof(test_input):
     next(s)
     result = next(s)
 
-    assert result.position.index == 0
-    assert result.position.line == 1
-    assert result.position.column == 1
+    assert result.position is None
     assert result.character == ''
 
 
