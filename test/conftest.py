@@ -18,15 +18,34 @@ def parser():
 
 
 @pytest.fixture
-def lexer():
-    from pylang.lexer3 import Lexer
+def context():
+    from pylang.lexer3.context import Context
+    from pylang.lexer3.stream import Stream
 
-    def inner(state_name, data, advance_by=1):
-        lexer = Lexer(data)
-        for _ in range(advance_by):
-            lexer.advance()
-        lexer.transition(getattr(lexer, state_name))
+    def inner(data):
+        return Context(Stream(data))
 
-        return lexer
+    return inner
+
+
+@pytest.fixture
+def context_at_next(context):
+    def inner(data):
+        ctx = context(data)
+        ctx.advance()
+
+        return ctx
+
+    return inner
+
+
+@pytest.fixture
+def context_at_current(context):
+    def inner(data):
+        ctx = context(data)
+        ctx.advance()
+        ctx.advance()
+
+        return ctx
 
     return inner

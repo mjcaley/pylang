@@ -2,19 +2,11 @@
 
 import pytest
 
-from pylang.lexer3 import TokenType
+from pylang.lexer3.states import End
 
 
-def test_emit_dedent_token(lexer):
-    l = lexer('end', '', 0)
-    result = next(l)
-
-    assert result.token_type == TokenType.Dedent
-
-
-def test_raise_stop_iteration(lexer):
-    l = lexer('end', '', 0)
-    next(l)
+def test_raise_stop_iteration():
+    e = End(None)
 
     with pytest.raises(StopIteration):
-        next(l)
+        e()

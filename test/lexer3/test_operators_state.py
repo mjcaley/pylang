@@ -2,352 +2,114 @@
 
 import pytest
 
-from pylang.lexer3 import TokenType
-
-
-def test_emit_plus_token(lexer):
-    l = lexer('operators', '+')
-    result = next(l)
-
-    assert result.token_type == TokenType.Plus
-    assert result.position.index == 0
-    assert result.position.line == 1
-    assert result.position.column == 1
-    assert l.next_position is None
-
-
-def test_emit_plus_assign_token(lexer):
-    l = lexer('operators', '+=')
-    result = next(l)
-
-    assert result.token_type == TokenType.PlusAssign
-    assert result.position.index == 0
-    assert result.position.line == 1
-    assert result.position.column == 1
-    assert l.next_position is None
-
-
-def test_emit_minus_token(lexer):
-    l = lexer('operators', '-')
-    result = next(l)
-
-    assert result.token_type == TokenType.Minus
-    assert l.next_position is None
-
-
-def test_emit_minus_assign_token(lexer):
-    l = lexer('operators', '-=')
-    result = next(l)
-
-    assert result.token_type == TokenType.MinusAssign
-    assert l.next_position is None
-
-
-def test_emit_multiply_token(lexer):
-    l = lexer('operators', '*')
-    result = next(l)
-
-    assert result.token_type == TokenType.Multiply
-    assert l.next_position is None
-
-
-def test_emit_multiply_assign_token(lexer):
-    l = lexer('operators', '*=')
-    result = next(l)
-
-    assert result.token_type == TokenType.MultiplyAssign
-    assert l.next_position is None
-
-
-def test_emit_divide_token(lexer):
-    l = lexer('operators', '/')
-    result = next(l)
-
-    assert result.token_type == TokenType.Divide
-    assert l.next_position is None
-
-
-def test_emit_divide_assign_token(lexer):
-    l = lexer('operators', '/=')
-    result = next(l)
-
-    assert result.token_type == TokenType.DivideAssign
-    assert l.next_position is None
-
-
-def test_emit_exponent_token(lexer):
-    l = lexer('operators', '**')
-    result = next(l)
-
-    assert result.token_type == TokenType.Exponent
-    assert l.next_position is None
-
-
-def test_emit_exponent_assign_token(lexer):
-    l = lexer('operators', '**=')
-    result = next(l)
-
-    assert result.token_type == TokenType.ExponentAssign
-    assert l.next_position is None
-
-
-def test_emit_modulo_token(lexer):
-    l = lexer('operators', '%')
-    result = next(l)
-
-    assert result.token_type == TokenType.Modulo
-    assert l.next_position is None
-
-
-def test_emit_modulo_assign_token(lexer):
-    l = lexer('operators', '%=')
-    result = next(l)
-
-    assert result.token_type == TokenType.ModuloAssign
-    assert l.next_position is None
-
-
-def test_emit_assignment_token(lexer):
-    l = lexer('operators', '=')
-    result = next(l)
-
-    assert result.token_type == TokenType.Assignment
-    assert l.next_position is None
-
-
-def test_emit_equal_token(lexer):
-    l = lexer('operators', '==')
-    result = next(l)
-
-    assert result.token_type == TokenType.Equal
-    assert result.position.index == 0
-    assert result.position.line == 1
-    assert result.position.column == 1
-    assert l.next_position is None
-
-
-def test_emit_not_equal_token(lexer):
-    l = lexer('operators', '!=')
-    result = next(l)
-
-    assert result.token_type == TokenType.NotEqual
-    assert result.position.index == 0
-    assert result.position.line == 1
-    assert result.position.column == 1
-    assert l.next_position is None
-
-
-def test_emit_less_than_token(lexer):
-    l = lexer('operators', '<')
-    result = next(l)
-
-    assert result.token_type == TokenType.LessThan
-    assert result.position.index == 0
-    assert result.position.line == 1
-    assert result.position.column == 1
-    assert l.next_position is None
-
-
-def test_emit_less_than_or_equal_token(lexer):
-    l = lexer('operators', '<=')
-    result = next(l)
-
-    assert result.token_type == TokenType.LessThanOrEqual
-    assert result.position.index == 0
-    assert result.position.line == 1
-    assert result.position.column == 1
-    assert l.next_position is None
-
-
-def test_emit_greater_than_token(lexer):
-    l = lexer('operators', '>')
-    result = next(l)
-
-    assert result.token_type == TokenType.GreaterThan
-    assert result.position.index == 0
-    assert result.position.line == 1
-    assert result.position.column == 1
-    assert l.next_position is None
-
-
-def test_emit_greater_or_equal_than_token(lexer):
-    l = lexer('operators', '>=')
-    result = next(l)
-
-    assert result.token_type == TokenType.GreaterThanOrEqual
-    assert result.position.index == 0
-    assert result.position.line == 1
-    assert result.position.column == 1
-    assert l.next_position is None
-
-
-def test_emit_dot_token(lexer):
-    l = lexer('operators', '.')
-    result = next(l)
-
-    assert result.token_type == TokenType.Dot
-    assert result.position.index == 0
-    assert result.position.line == 1
-    assert result.position.column == 1
-    assert l.next_position is None
-
-
-def test_emit_colon_token(lexer):
-    l = lexer('operators', ':')
-    result = next(l)
-
-    assert result.token_type == TokenType.Colon
-    assert result.position.index == 0
-    assert result.position.line == 1
-    assert result.position.column == 1
-    assert l.next_position is None
-
-
-def test_emit_comma_token(lexer):
-    l = lexer('operators', ',')
-    result = next(l)
-
-    assert result.token_type == TokenType.Comma
-    assert result.position.index == 0
-    assert result.position.line == 1
-    assert result.position.column == 1
-    assert l.next_position is None
-
-
-def test_emit_left_parentheses_token(lexer):
-    l = lexer('operators', '(')
-    result = next(l)
-
-    assert result.token_type == TokenType.LParen
-    assert result.position.index == 0
-    assert result.position.line == 1
-    assert result.position.column == 1
-    assert l.next_position is None
-
-
-def test_emit_left_square_token(lexer):
-    l = lexer('operators', '[')
-    result = next(l)
-
-    assert result.token_type == TokenType.LSquare
-    assert result.position.index == 0
-    assert result.position.line == 1
-    assert result.position.column == 1
-    assert l.next_position is None
-
-
-def test_emit_left_brace_token(lexer):
-    l = lexer('operators', '{')
-    result = next(l)
-
-    assert result.token_type == TokenType.LBrace
-    assert result.position.index == 0
-    assert result.position.line == 1
-    assert result.position.column == 1
-    assert l.next_position is None
-
-
-def test_emit_right_parentheses_token(lexer):
-    l = lexer('operators', '()')
-    next(l)
-    result = next(l)
-
-    assert result.token_type == TokenType.RParen
-    assert result.position.index == 1
-    assert result.position.line == 1
-    assert result.position.column == 2
-    assert l.next_position is None
-
-
-def test_emit_right_parentheses_error_token(lexer):
-    l = lexer('operators', '[)')
-    next(l)
-    result = next(l)
-
-    assert result.token_type == TokenType.Error
-    assert result.position.index == 1
-    assert result.position.line == 1
-    assert result.position.column == 2
-    assert l.next_position is None
-
-
-def test_emit_right_square_token(lexer):
-    l = lexer('operators', '[]')
-    next(l)
-    result = next(l)
-
-    assert result.token_type == TokenType.RSquare
-    assert result.position.index == 1
-    assert result.position.line == 1
-    assert result.position.column == 2
-    assert l.next_position is None
-
-
-def test_emit_right_square_error_token(lexer):
-    l = lexer('operators', '(]')
-    next(l)
-    result = next(l)
-
-    assert result.token_type == TokenType.Error
-    assert result.position.index == 1
-    assert result.position.line == 1
-    assert result.position.column == 2
-    assert l.next_position is None
-
-
-def test_emit_right_brace_token(lexer):
-    l = lexer('operators', '{}')
-    next(l)
-    result = next(l)
-
-    assert result.token_type == TokenType.RBrace
-    assert result.position.index == 1
-    assert result.position.line == 1
-    assert result.position.column == 2
-    assert l.next_position is None
-
-
-def test_emit_right_brace_error_token(lexer):
-    l = lexer('operators', '[}')
-    next(l)
-    result = next(l)
-
-    assert result.token_type == TokenType.Error
-    assert result.position.index == 1
-    assert result.position.line == 1
-    assert result.position.column == 2
-    assert l.next_position is None
-
-
-def test_emit_exclamation_error_token(lexer):
-    l = lexer('operators', '!')
-    result = next(l)
-
-    assert result.token_type == TokenType.Error
-
-
-@pytest.mark.xfail
-def test_transition_to_number(lexer):
-    l = lexer('operators', '123')
-    state = l.state
-    next(l)
-
-    assert state != l.state
-
-
-@pytest.mark.xfail
-def test_transition_to_word(lexer):
-    l = lexer('operators', 'abc')
-    state = l.state
-    next(l)
-
-    assert state != l.state
-
-
-@pytest.mark.xfail
-def test_transition_to_string(lexer):
-    l = lexer('operators', '"abc"')
-    state = l.state
-    next(l)
-
-    assert state != l.state
+from pylang.lexer3.states import Operators, End
+from pylang.lexer3.token import TokenType
+
+
+def test_eof_transitions_to_file_end(context):
+    o = Operators(context(''))
+    result = o()
+
+    assert isinstance(result[0], End)
+    assert result[1].token_type == TokenType.Dedent
+    assert result[1].position is None
+
+
+@pytest.mark.parametrize('test_input,token_type', [
+    ('+', TokenType.Plus),
+    ('-', TokenType.Minus),
+    ('*', TokenType.Multiply),
+    ('/', TokenType.Divide),
+    ('%', TokenType.Modulo),
+    ('**', TokenType.Exponent),
+    ('=', TokenType.Assignment),
+    ('<', TokenType.LessThan),
+    ('>', TokenType.GreaterThan),
+    ('.', TokenType.Dot),
+    (':', TokenType.Colon),
+    (',', TokenType.Comma),
+    ('==', TokenType.Equal),
+    ('<=', TokenType.LessThanOrEqual),
+    ('>=', TokenType.GreaterThanOrEqual),
+    ('!=', TokenType.NotEqual),
+    ('+=', TokenType.PlusAssign),
+    ('-=', TokenType.MinusAssign),
+    ('*=', TokenType.MultiplyAssign),
+    ('/=', TokenType.DivideAssign),
+    ('%=', TokenType.ModuloAssign),
+    ('**=', TokenType.ExponentAssign),
+])
+def test_call_token(context_at_next, test_input, token_type):
+    o = Operators(context_at_next(test_input))
+    result = o()
+
+    assert isinstance(result[0], Operators)
+    assert result[1].token_type == token_type
+    assert result[1].position.index == 0
+    assert result[1].position.line == 1
+    assert result[1].position.column == 1
+
+
+def test_error_with_invalid_input(context_at_next):
+    o = Operators(context_at_next('!'))
+    result = o()
+
+    assert isinstance(result[0], Operators)
+    assert result[1].token_type == TokenType.Error
+    assert result[1].position.index == 0
+    assert result[1].position.line == 1
+    assert result[1].position.column == 1
+
+
+@pytest.mark.parametrize('test_input,token_type', [
+    ('(', TokenType.LParen),
+    ('[', TokenType.LSquare),
+    ('{', TokenType.LBrace),
+])
+def test_call_left_bracket(mocker, context_at_next, test_input, token_type):
+    o = Operators(context_at_next(test_input))
+    mocker.spy(o.context, 'push_bracket')
+    result = o()
+
+    assert isinstance(result[0], Operators)
+    assert result[1].token_type == token_type
+    assert result[1].position.index == 0
+    assert result[1].position.line == 1
+    assert result[1].position.column == 1
+    assert o.context.push_bracket.called
+
+
+@pytest.mark.parametrize('test_input,left_bracket,token_type', [
+    (')', '(', TokenType.RParen),
+    (']', '[', TokenType.RSquare),
+    ('}', '{', TokenType.RBrace),
+])
+def test_call_right_bracket(mocker, context_at_next, test_input, left_bracket, token_type):
+    o = Operators(context_at_next(test_input))
+    o.context.push_bracket(left_bracket)
+    mocker.spy(o.context, 'pop_bracket')
+    result = o()
+
+    assert isinstance(result[0], Operators)
+    assert result[1].token_type == token_type
+    assert result[1].position.index == 0
+    assert result[1].position.line == 1
+    assert result[1].position.column == 1
+    assert o.context.pop_bracket.called
+
+
+@pytest.mark.parametrize('test_input', [
+    ')', ']', '}'
+])
+def test_right_bracket_mismatched(mocker, context_at_next, test_input):
+    o = Operators(context_at_next(test_input))
+    o.context.push_bracket('\0')
+    mocker.spy(o.context, 'pop_bracket')
+    result = o()
+
+    assert isinstance(result[0], Operators)
+    assert result[1].token_type == TokenType.Error
+    assert result[1].position.index == 0
+    assert result[1].position.line == 1
+    assert result[1].position.column == 1
+    assert o.context.pop_bracket.called
