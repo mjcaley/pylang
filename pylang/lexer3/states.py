@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from string import digits, hexdigits, octdigits
+
 from .characters import INDENT, NEWLINE, WHITESPACE
 from .exceptions import MismatchedBracketException
 from .token import Token, TokenType
@@ -10,15 +12,15 @@ class State:
         self.context = context
 
     def append_while(self, characters):
-        string = ''
-        while self.context.next in characters and self.context.next:
+        string = self.context.current
+        while self.context.current in characters and self.context.current:
             _, character = self.context.advance()
             string += character
         return string
 
     def append_while_not(self, characters):
-        string = ''
-        while self.context.next not in characters and self.context.next:
+        string = self.context.current
+        while self.context.current not in characters and self.context.current:
             _, character = self.context.advance()
             string += character
         return string
@@ -171,6 +173,12 @@ class Operators(State):
                 return self, Token(TokenType.Error, position, f'Opening bracket was {e.expected}')
             else:
                 return self, Token(TokenType.RBrace, position)
+
+
+class Number(State):
+    def __call__(self):
+        number = self.append_while(digits)
+        return Operators(self.context), Token(TokenType.Integer, number)
 
 
 class FileEnd(State):

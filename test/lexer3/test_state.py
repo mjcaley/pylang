@@ -8,15 +8,15 @@ from pylang.lexer3.characters import WHITESPACE
 from pylang.lexer3.states import State
 
 
-def test_append_while(context_at_next):
-    s = State(context_at_next('123'))
+def test_append_while(context_at_current):
+    s = State(context_at_current('123'))
     result = s.append_while(digits)
 
     assert result == '123'
 
 
-def test_append_while_not(context_at_next):
-    s = State(context_at_next('123'))
+def test_append_while_not(context_at_current):
+    s = State(context_at_current('123'))
     result = s.append_while_not(WHITESPACE)
 
     assert result == '123'
