@@ -13,6 +13,7 @@ llvmlite = "^0.26.0"
 [tool.poetry.dev-dependencies]
 pytest = "^4.0"
 pytest-cov = "^2.6"
+pytest-mock = "^1.10"
 
 [tool.poetry.scripts]
 test = 'pytest:main'
