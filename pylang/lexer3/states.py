@@ -12,17 +12,17 @@ class State:
         self.context = context
 
     def append_while(self, characters):
-        string = self.context.current
+        string = ''
         while self.context.current in characters and self.context.current:
-            _, character = self.context.advance()
-            string += character
+            string += self.context.current
+            self.context.advance()
         return string
 
     def append_while_not(self, characters):
-        string = self.context.current
+        string = ''
         while self.context.current not in characters and self.context.current:
-            _, character = self.context.advance()
-            string += character
+            string += self.context.current
+            self.context.advance()
         return string
 
     def skip_until(self, characters):

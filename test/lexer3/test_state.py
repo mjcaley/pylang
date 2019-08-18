@@ -8,8 +8,11 @@ from pylang.lexer3.characters import WHITESPACE
 from pylang.lexer3.states import State
 
 
-def test_append_while(context_at_current):
-    s = State(context_at_current('123'))
+@pytest.mark.parametrize('test_input', [
+    '123', '123_'
+])
+def test_append_while(context_at_current, test_input):
+    s = State(context_at_current(test_input))
     result = s.append_while(digits)
 
     assert result == '123'
