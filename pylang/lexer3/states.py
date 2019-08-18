@@ -3,7 +3,7 @@
 from string import digits, hexdigits, octdigits
 
 from .characters import INDENT, NEWLINE, WHITESPACE
-from .exceptions import MismatchedBracketException
+from .exceptions import InvalidNumberInputException, MismatchedBracketException
 from .token import Token, TokenType
 
 
@@ -176,9 +176,44 @@ class Operators(State):
 
 
 class Number(State):
+    def consume_number(self, characters):
+        value = self.append_while(characters)
+
+        while self.match('_'):
+            if self.next_in(characters):
+                self.context.advance()
+                value += self.append_while(characters)
+            else:
+                raise InvalidNumberInputException
+
+        return value
+
+    def read_number(self):
+        if self.match('0') and self.match_next('x'):
+            self.context.advance()
+            self.context.advance()
+            return int(self.consume_number(hexdigits), 16)
+        elif self.match('0') and self.match_next('b'):
+            self.context.advance()
+            self.context.advance()
+            return int(self.consume_number(['0', '1']), 2)
+        elif self.match('0') and self.match_next('o'):
+            self.context.advance()
+            self.context.advance()
+            return int(self.consume_number(octdigits), 8)
+        elif self.current_in(digits):
+            return int(self.consume_number(digits))
+        else:
+            raise InvalidNumberInputException
+
     def __call__(self):
-        number = self.append_while(digits)
-        return Operators(self.context), Token(TokenType.Integer, number)
+        position = self.context.current_position
+        try:
+            first_number = self.read_number()
+        except InvalidNumberInputException:
+            return Operators(self.context), Token(TokenType.Error, position)
+
+        return Operators(self.context), Token(TokenType.Integer, position, first_number)
 
 
 class FileEnd(State):
