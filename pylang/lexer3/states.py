@@ -192,28 +192,41 @@ class Number(State):
         if self.match('0') and self.match_next('x'):
             self.context.advance()
             self.context.advance()
-            return int(self.consume_number(hexdigits), 16)
+            return '0x' + self.consume_number(hexdigits)
         elif self.match('0') and self.match_next('b'):
             self.context.advance()
             self.context.advance()
-            return int(self.consume_number(['0', '1']), 2)
+            return '0b' + self.consume_number(['0', '1'])
         elif self.match('0') and self.match_next('o'):
             self.context.advance()
             self.context.advance()
-            return int(self.consume_number(octdigits), 8)
+            return '0o' + self.consume_number(octdigits)
         elif self.current_in(digits):
-            return int(self.consume_number(digits))
+            return self.consume_number(digits)
         else:
             raise InvalidNumberInputException
 
     def __call__(self):
         position = self.context.current_position
+
         try:
             first_number = self.read_number()
         except InvalidNumberInputException:
             return Operators(self.context), Token(TokenType.Error, position)
 
-        return Operators(self.context), Token(TokenType.Integer, position, first_number)
+        if self.match('.') and self.next_in(digits):
+            self.context.advance()
+            try:
+                second_number = self.read_number()
+            except InvalidNumberInputException:
+                return Operators(self.context), Token(TokenType.Error, position)
+
+            value = first_number + '.' + second_number
+            return Operators(self.context), Token(TokenType.Float, position, value)
+        elif self.match('.') and not self.next_in(digits):
+            return Operators(self.context), Token(TokenType.Integer, position, first_number)
+        else:
+            return Operators(self.context), Token(TokenType.Integer, position, first_number)
 
 
 class FileEnd(State):
