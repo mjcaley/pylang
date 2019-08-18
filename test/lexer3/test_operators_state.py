@@ -39,8 +39,8 @@ def test_eof_transitions_to_file_end(context):
     ('%=', TokenType.ModuloAssign),
     ('**=', TokenType.ExponentAssign),
 ])
-def test_call_token(context_at_next, test_input, token_type):
-    o = Operators(context_at_next(test_input))
+def test_call_token(context_at_current, test_input, token_type):
+    o = Operators(context_at_current(test_input))
     result = o()
 
     assert isinstance(result[0], Operators)
@@ -50,8 +50,8 @@ def test_call_token(context_at_next, test_input, token_type):
     assert result[1].position.column == 1
 
 
-def test_error_with_invalid_input(context_at_next):
-    o = Operators(context_at_next('!'))
+def test_error_with_invalid_input(context_at_current):
+    o = Operators(context_at_current('!'))
     result = o()
 
     assert isinstance(result[0], Operators)
@@ -66,8 +66,8 @@ def test_error_with_invalid_input(context_at_next):
     ('[', TokenType.LSquare),
     ('{', TokenType.LBrace),
 ])
-def test_call_left_bracket(mocker, context_at_next, test_input, token_type):
-    o = Operators(context_at_next(test_input))
+def test_call_left_bracket(mocker, context_at_current, test_input, token_type):
+    o = Operators(context_at_current(test_input))
     mocker.spy(o.context, 'push_bracket')
     result = o()
 
@@ -84,8 +84,8 @@ def test_call_left_bracket(mocker, context_at_next, test_input, token_type):
     (']', '[', TokenType.RSquare),
     ('}', '{', TokenType.RBrace),
 ])
-def test_call_right_bracket(mocker, context_at_next, test_input, left_bracket, token_type):
-    o = Operators(context_at_next(test_input))
+def test_call_right_bracket(mocker, context_at_current, test_input, left_bracket, token_type):
+    o = Operators(context_at_current(test_input))
     o.context.push_bracket(left_bracket)
     mocker.spy(o.context, 'pop_bracket')
     result = o()
@@ -101,8 +101,8 @@ def test_call_right_bracket(mocker, context_at_next, test_input, left_bracket, t
 @pytest.mark.parametrize('test_input', [
     ')', ']', '}'
 ])
-def test_right_bracket_mismatched(mocker, context_at_next, test_input):
-    o = Operators(context_at_next(test_input))
+def test_right_bracket_mismatched(mocker, context_at_current, test_input):
+    o = Operators(context_at_current(test_input))
     o.context.push_bracket('\0')
     mocker.spy(o.context, 'pop_bracket')
     result = o()

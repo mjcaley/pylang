@@ -70,9 +70,25 @@ class FileStart(State):
         return Operators(self.context), Token(TokenType.Indent, None)
 
 
+class Indent(State):
+    def __call__(self):
+        # consume whitespace
+        # if current == newline
+        #   blank line; consume newline and transition to Operators
+        #
+        # if length > top:
+        #   emit indent token
+        # elif length == top:
+        #   transition to Operators
+        # elif length < top:
+        #   emit dedent token
+        pass
+
+
 class Operators(State):
     def __call__(self):
-        position, character = self.context.advance()
+        position = self.context.current_position
+        character = self.context.current
 
         if not self.context.current:
             state = FileEnd(self.context)
