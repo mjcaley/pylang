@@ -13,6 +13,13 @@ def test_init(mocker):
     assert 'c' in locals()
 
 
+def test_indent(mocker):
+    c = Context(mocker.stub())
+    c.push_indent(4)
+
+    assert c.indent == 4
+
+
 def test_push_indent(mocker):
     c = Context(mocker.stub())
     c.push_indent(length=0)
@@ -28,30 +35,12 @@ def test_push_indent_mismatch(mocker):
         c.push_indent(length=-1)
 
 
-def test_pop_indent_one_level(mocker):
+def test_pop_indent(mocker):
     c = Context(mocker.stub())
     c.push_indent(length=0)
-    result = c.pop_indent(until=0)
+    result = c.pop_indent()
 
-    assert result == []
-
-
-def test_pop_indent_multiple_levels(mocker):
-    c = Context(mocker.stub())
-    c.push_indent(length=0)
-    c.push_indent(length=4)
-    c.push_indent(length=8)
-    result = c.pop_indent(until=0)
-
-    assert result == [8, 4]
-
-
-def test_pop_indent_mismatched(mocker):
-    c = Context(mocker.stub())
-    c.push_indent(length=0)
-
-    with pytest.raises(MismatchedIndentException):
-        c.pop_indent(until=-1)
+    assert result == 0
 
 
 def test_pop_indent_empty(mocker):

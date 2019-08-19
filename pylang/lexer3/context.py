@@ -18,6 +18,10 @@ class Context:
         self._next = ''
         self._next_position = None
 
+    @property
+    def indent(self):
+        return self._indents[-1]
+
     def push_indent(self, length):
         if self._indents:
             top = self._indents[-1]
@@ -25,15 +29,11 @@ class Context:
                 raise MismatchedIndentException(expected=top, found=length)
         self._indents.append(length)
 
-    def pop_indent(self, until):
+    def pop_indent(self):
         try:
-            index = self._indents.index(until) + 1  # One ahead of matched indent
-        except ValueError:
-            raise MismatchedIndentException(expected=until, found=None)
-
-        self._indents, popped = self._indents[:index], [level for level in reversed(self._indents[index:])]
-
-        return popped
+            return self._indents.pop()
+        except IndexError:
+            raise MismatchedIndentException
 
     def push_bracket(self, bracket):
         self._brackets.append(bracket)

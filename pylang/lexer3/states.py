@@ -72,17 +72,43 @@ class FileStart(State):
 
 class Indent(State):
     def __call__(self):
-        # consume whitespace
-        # if current == newline
-        #   blank line; consume newline and transition to Operators
-        #
+        # Skip if not at beginning of line
+        if self.context.current_position.column != 1:
+            state = Operators(self.context)
+            return state()
+
+        # Skip if not indent character
+        if not self.current_in(INDENT + NEWLINE):
+            state = Operators(self.context)
+            return state()
+
+        position = self.context.current_position
+        whitespace = len(self.append_while(INDENT))
+
+        # Skip blank lines
+        if self.current_in(NEWLINE):
+            self.context.advance()
+            state = Indent(self.context)
+            return state()
+
+        if whitespace > self.context.indent:
+            self.context.push_indent(whitespace)
+            return Operators(self.context), Token(TokenType.Indent, position)
+        elif whitespace == self.context.indent:
+            state = Operators(self.context)
+            return state()
+        elif whitespace < self.context.indent:
+            self.context.pop_indent()
+            return None     # TODO: Figure out how to return multiple dedents
+
         # if length > top:
         #   emit indent token
         # elif length == top:
         #   transition to Operators
         # elif length < top:
         #   emit dedent token
-        pass
+        # if end of file
+        #   pop indents until empty
 
 
 class Operators(State):
