@@ -3,7 +3,7 @@
 from string import digits, hexdigits, octdigits
 
 from .characters import INDENT, NEWLINE, WHITESPACE
-from .exceptions import InvalidNumberInputException, MismatchedBracketException
+from .exceptions import InvalidNumberInputException, MismatchedBracketException, MismatchedIndentException
 from .token import Token, TokenType
 
 
@@ -71,25 +71,70 @@ class FileStart(State):
 
 
 class Indent(State):
+    """
+    if self.target_indent:  # set by another branch of code
+        pop indent
+        if target_indent == indent
+            set target_indent to None
+            continue
+        elif target_indent < indent:
+            return Dedent
+        elif target_indent > indent:
+            return Error
+
+    if not beginning of line:
+        transition to Operators
+
+    gather whitespace length
+
+    # Skip empty line
+    if current is newline
+        advance
+        transition to self
+
+    if len > indent
+        return Operators, Indent
+    if len < indent
+        set target_indent to len
+        pop indent
+        return self, Dedent
+    if len == indent
+        transition to Operators
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.target_indent = 0
+
     def __call__(self):
+        position = self.context.current_position
+
+        # Dump remaining dedents
+        if self.target_indent > self.context.indent:
+            self.context.pop_indent()
+            return self, Token(TokenType.Dedent, position)
+        elif self.target_indent == self.context.indent:
+            self.target_indent = 0
+            # return Operators(self.context), Token(TokenType.Dedent, position)
+        elif self.target_indent:
+            self.target_indent = None
+            return Operators(self.context), Token(TokenType.Error, position)
+
         # Skip if not at beginning of line
         if self.context.current_position.column != 1:
             state = Operators(self.context)
             return state()
 
-        # Skip if not indent character
-        if not self.current_in(INDENT + NEWLINE):
-            state = Operators(self.context)
-            return state()
+        # # Skip if not indent character
+        # if not self.current_in(INDENT + NEWLINE):
+        #     state = Operators(self.context)
+        #     return state()
 
-        position = self.context.current_position
         whitespace = len(self.append_while(INDENT))
 
         # Skip blank lines
         if self.current_in(NEWLINE):
             self.context.advance()
-            state = Indent(self.context)
-            return state()
+            return self()
 
         if whitespace > self.context.indent:
             self.context.push_indent(whitespace)
@@ -98,8 +143,13 @@ class Indent(State):
             state = Operators(self.context)
             return state()
         elif whitespace < self.context.indent:
-            self.context.pop_indent()
-            return None     # TODO: Figure out how to return multiple dedents
+            try:
+                self.context.pop_indent()
+            except MismatchedIndentException:
+                return self, Token(TokenType.Error, position)
+            self.target_indent = whitespace
+            return self, Token(TokenType.Dedent, position)
+
 
         # if length > top:
         #   emit indent token

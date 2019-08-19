@@ -20,6 +20,12 @@ def test_indent(mocker):
     assert c.indent == 4
 
 
+def test_indent_none_when_empty(mocker):
+    c = Context(mocker.stub())
+
+    assert c.indent is None
+
+
 def test_push_indent(mocker):
     c = Context(mocker.stub())
     c.push_indent(length=0)

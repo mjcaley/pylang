@@ -20,7 +20,10 @@ class Context:
 
     @property
     def indent(self):
-        return self._indents[-1]
+        try:
+            return self._indents[-1]
+        except IndexError:
+            return None
 
     def push_indent(self, length):
         if self._indents:
