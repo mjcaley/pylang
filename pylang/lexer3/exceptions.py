@@ -6,9 +6,7 @@ class LexerException(Exception):
 
 
 class MismatchedIndentException(LexerException):
-    def __init__(self, expected, found):
-        self.expected = expected
-        self.found = found
+    pass
 
 
 class MismatchedBracketException(LexerException):

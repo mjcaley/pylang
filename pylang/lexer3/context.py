@@ -26,7 +26,7 @@ class Context:
         if self._indents:
             top = self._indents[-1]
             if top > length:
-                raise MismatchedIndentException(expected=top, found=length)
+                raise MismatchedIndentException
         self._indents.append(length)
 
     def pop_indent(self):

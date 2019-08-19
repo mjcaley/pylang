@@ -47,7 +47,7 @@ def test_pop_indent_empty(mocker):
     c = Context(mocker.stub())
 
     with pytest.raises(MismatchedIndentException):
-        c.pop_indent(until=0)
+        c.pop_indent()
 
 
 def test_push_bracket(mocker):
