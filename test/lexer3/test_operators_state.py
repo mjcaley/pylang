@@ -2,17 +2,17 @@
 
 import pytest
 
-from pylang.lexer3.states import Operators, End
+from pylang.lexer3.states import Operators
 from pylang.lexer3.token import TokenType
 
 
-def test_eof_transitions_to_file_end(context):
+def test_eof_transitions_to_indent(context, mocker):
     o = Operators(context(''))
+    mocked_indent = mocker.patch('pylang.lexer3.states.Indent')
+    called_instance = mocked_indent()()
     result = o()
 
-    assert isinstance(result[0], End)
-    assert result[1].token_type == TokenType.Dedent
-    assert result[1].position is None
+    assert result == called_instance
 
 
 @pytest.mark.parametrize('test_input,token_type', [
