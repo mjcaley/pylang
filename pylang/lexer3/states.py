@@ -36,12 +36,6 @@ class State:
     def skip_whitespace(self):
         self.skip_while(WHITESPACE)
 
-    def skip_empty_lines(self):
-        # Weird implementation, might not work
-        while self.context.current and self.match_next(NEWLINE):
-            self.skip_while(NEWLINE)
-            self.append_while(WHITESPACE + INDENT)
-
     def match(self, character):
         return character == self.context.current
 
@@ -53,6 +47,10 @@ class State:
 
     def next_in(self, characters):
         return all([self.context.next in characters, self.context.next])
+
+    @property
+    def eof(self):
+        return not any([self.context.current, self.context.next])
 
     def __call__(self):
         raise NotImplementedError
@@ -71,65 +69,21 @@ class FileStart(State):
 
 
 class Indent(State):
-    """
-    if self.target_indent:  # set by another branch of code
-        pop indent
-        if target_indent == indent
-            set target_indent to None
-            continue
-        elif target_indent < indent:
-            return Dedent
-        elif target_indent > indent:
-            return Error
-
-    if not beginning of line:
-        transition to Operators
-
-    gather whitespace length
-
-    # Skip empty line
-    if current is newline
-        advance
-        transition to self
-
-    if len > indent
-        return Operators, Indent
-    if len < indent
-        set target_indent to len
-        pop indent
-        return self, Dedent
-    if len == indent
-        transition to Operators
-    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.target_indent = 0
 
     def __call__(self):
         position = self.context.current_position
+        whitespace = len(self.append_while(INDENT))
 
-        # Dump remaining dedents
-        if self.target_indent > self.context.indent:
-            self.context.pop_indent()
-            return self, Token(TokenType.Dedent, position)
-        elif self.target_indent == self.context.indent:
-            self.target_indent = 0
-            # return Operators(self.context), Token(TokenType.Dedent, position)
-        elif self.target_indent:
-            self.target_indent = None
-            return Operators(self.context), Token(TokenType.Error, position)
-
-        # Skip if not at beginning of line
-        if self.context.current_position.column != 1:
-            state = Operators(self.context)
+        if self.eof:
+            state = Dedent(self.context, target_indent=0)
             return state()
 
-        # # Skip if not indent character
-        # if not self.current_in(INDENT + NEWLINE):
-        #     state = Operators(self.context)
-        #     return state()
-
-        whitespace = len(self.append_while(INDENT))
+        # Skip if not at beginning of line
+        if position.column != 1:
+            state = Operators(self.context)
+            return state()
 
         # Skip blank lines
         if self.current_in(NEWLINE):
@@ -143,22 +97,26 @@ class Indent(State):
             state = Operators(self.context)
             return state()
         elif whitespace < self.context.indent:
-            try:
-                self.context.pop_indent()
-            except MismatchedIndentException:
-                return self, Token(TokenType.Error, position)
-            self.target_indent = whitespace
-            return self, Token(TokenType.Dedent, position)
+            state = Dedent(self.context, target_indent=whitespace)
+            return state()
 
 
-        # if length > top:
-        #   emit indent token
-        # elif length == top:
-        #   transition to Operators
-        # elif length < top:
-        #   emit dedent token
-        # if end of file
-        #   pop indents until empty
+class Dedent(State):
+    def __init__(self, *args, target_indent, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.target_indent = target_indent
+
+    def __call__(self):
+        if self.target_indent == self.context.indent:
+            if self.match(''):
+                state = FileEnd(self.context)
+                return state()
+            else:
+                state = Indent(self.context)
+                return state()
+        elif self.target_indent < self.context.indent:
+            self.context.pop_indent()
+            return self, Token(TokenType.Dedent, self.context.current_position)
 
 
 class Operators(State):
@@ -166,8 +124,8 @@ class Operators(State):
         position = self.context.current_position
         character = self.context.current
 
-        if not self.context.current:
-            state = FileEnd(self.context)
+        if self.eof:
+            state = Indent(self.context)
             return state()
 
         if self.match('+'):

@@ -55,12 +55,6 @@ def test_skip_while(context_at_current):
     assert s.context.current_position.column == 3
 
 
-@pytest.mark.xfail
-def test_skip_empty_lines():
-    # not sure if keeping the method
-    assert False
-
-
 def test_match(context_at_current):
     s = State(context_at_current('123'))
 
@@ -90,3 +84,15 @@ def test_call(mocker):
 
     with pytest.raises(NotImplementedError):
         assert s()
+
+
+def test_eof_true(context_at_current):
+    s = State(context_at_current(''))
+
+    assert s.eof is True
+
+
+def test_eof_false(context_at_current):
+    s = State(context_at_current('123'))
+
+    assert s.eof is False
