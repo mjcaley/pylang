@@ -262,21 +262,21 @@ class Number(State):
         try:
             first_number = self.read_number()
         except InvalidNumberInputException:
-            return Operators(self.context), Token(TokenType.Error, position)
+            return Indent(self.context), Token(TokenType.Error, position)
 
         if self.match('.') and self.next_in(digits):
             self.context.advance()
             try:
                 second_number = self.read_number()
             except InvalidNumberInputException:
-                return Operators(self.context), Token(TokenType.Error, position)
+                return Indent(self.context), Token(TokenType.Error, position)
 
             value = first_number + '.' + second_number
-            return Operators(self.context), Token(TokenType.Float, position, value)
+            return Indent(self.context), Token(TokenType.Float, position, value)
         elif self.match('.') and not self.next_in(digits):
-            return Operators(self.context), Token(TokenType.Integer, position, first_number)
+            return Indent(self.context), Token(TokenType.Integer, position, first_number)
         else:
-            return Operators(self.context), Token(TokenType.Integer, position, first_number)
+            return Indent(self.context), Token(TokenType.Integer, position, first_number)
 
 
 class FileEnd(State):

@@ -5,7 +5,7 @@ import pytest
 from string import digits
 
 from pylang.lexer3.exceptions import InvalidNumberInputException
-from pylang.lexer3.states import Number, Operators
+from pylang.lexer3.states import Number
 from pylang.lexer3.token import TokenType
 
 
@@ -69,11 +69,13 @@ def test_read_number_raises(context_at_current, test_input):
     ('0b101010', TokenType.Integer),
     ('0o52', TokenType.Integer),
 ])
-def test_call_integer_token(context_at_current, test_input, token_type):
+def test_call_integer_token(context_at_current, test_input, token_type, mocker):
     n = Number(context_at_current(test_input))
+    mocked_indent = mocker.patch('pylang.lexer3.states.Indent')
+    instance = mocked_indent()
     result = n()
 
-    assert isinstance(result[0], Operators)
+    assert result[0] == instance
     assert result[1].token_type == token_type
     assert result[1].value == test_input
     assert result[1].position.index == 0
@@ -92,11 +94,13 @@ def test_call_integer_token(context_at_current, test_input, token_type):
     '0o52.0o52',
     '0o5_2.0o_52',
 ])
-def test_call_float_token(context_at_current, test_input):
+def test_call_float_token(context_at_current, test_input, mocker):
     n = Number(context_at_current(test_input))
+    mocked_indent = mocker.patch('pylang.lexer3.states.Indent')
+    instance = mocked_indent()
     result = n()
 
-    assert isinstance(result[0], Operators)
+    assert result[0] == instance
     assert result[1].token_type == TokenType.Float
     assert result[1].position.index == 0
     assert result[1].position.line == 1
@@ -104,11 +108,13 @@ def test_call_float_token(context_at_current, test_input):
     assert result[1].value == test_input.replace('_', '')
 
 
-def test_call_error_token(context_at_current):
+def test_call_error_token(context_at_current, mocker):
     n = Number(context_at_current('a123'))
+    mocked_indent = mocker.patch('pylang.lexer3.states.Indent')
+    instance = mocked_indent()
     result = n()
 
-    assert isinstance(result[0], Operators)
+    assert result[0] == instance
     assert result[1].token_type == TokenType.Error
     assert result[1].position.index == 0
     assert result[1].position.line == 1
