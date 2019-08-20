@@ -224,6 +224,10 @@ class Operators(State):
             else:
                 return self, Token(TokenType.RBrace, position)
 
+        elif self.current_in(digits):
+            state = Number(self.context)
+            return state()
+
 
 class Number(State):
     def consume_number(self, characters):

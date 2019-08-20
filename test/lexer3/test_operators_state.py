@@ -113,3 +113,15 @@ def test_right_bracket_mismatched(mocker, context_at_current, test_input):
     assert result[1].position.line == 1
     assert result[1].position.column == 1
     assert o.context.pop_bracket.called
+
+
+@pytest.mark.parametrize('test_input', [
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
+])
+def test_digit_transitions_to_number_state(context_at_current, mocker, test_input):
+    o = Operators(context_at_current(test_input))
+    mocked_number = mocker.patch('pylang.lexer3.states.Number')
+    called_instance = mocked_number()()
+    result = o()
+
+    assert result == called_instance
