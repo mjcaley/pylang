@@ -67,6 +67,7 @@ class FileStart(State):
     def __call__(self):
         self.context.advance()
         self.context.advance()
+        self.context.push_indent(0)
 
         return Indent(self.context), Token(TokenType.Indent, None)
 
@@ -332,6 +333,7 @@ class String(State):
 
 class FileEnd(State):
     def __call__(self):
+        self.context.pop_indent()
         state = End(self.context)
 
         return state, Token(TokenType.Dedent, None)
