@@ -38,6 +38,13 @@ class Context:
         except IndexError:
             raise MismatchedIndentException
 
+    @property
+    def bracket(self):
+        try:
+            return self._brackets[-1]
+        except IndexError:
+            return None
+
     def push_bracket(self, bracket):
         self._brackets.append(bracket)
 

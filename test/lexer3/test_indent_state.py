@@ -24,6 +24,17 @@ def test_transition_on_non_whitespace(context_at_current, mocker):
     assert result == called_instance
 
 
+def test_transition_when_in_bracket(context_at_current, mocker):
+    i = Indent(context_at_current('    +)'))
+    i.context.push_indent(0)
+    i.context.push_bracket('(')
+    mocked_operators = mocker.patch('pylang.lexer3.states.Operators')
+    called_instance = mocked_operators()()
+    result = i()
+
+    assert result == called_instance
+
+
 def test_skip_empty_line(context_at_current, mocker):
     i = Indent(context_at_current('    \n+'))
     i.context.push_indent(0)

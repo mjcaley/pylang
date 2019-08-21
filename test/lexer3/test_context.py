@@ -56,6 +56,19 @@ def test_pop_indent_empty(mocker):
         c.pop_indent()
 
 
+def test_bracket_none(mocker):
+    c = Context(mocker.stub())
+
+    assert c.bracket is None
+
+
+def test_bracket(mocker):
+    c = Context(mocker.stub())
+    c.push_bracket('(')
+
+    assert c.bracket == '('
+
+
 def test_push_bracket(mocker):
     c = Context(mocker.stub())
     c.push_bracket('(')

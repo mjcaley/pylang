@@ -83,6 +83,10 @@ class Indent(State):
         if self.eof:
             state = Dedent(self.context, target_indent=0)
             return state()
+        
+        if self.context.bracket:
+            state = Operators(self.context)
+            return state()
 
         # Skip if not at beginning of line
         if position.column != 1:
