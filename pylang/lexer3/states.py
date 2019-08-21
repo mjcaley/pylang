@@ -133,23 +133,25 @@ class Operators(State):
             return state()
 
         if self.match('+'):
-            if self.match_next('='):
+            self.context.advance()
+            if self.match('='):
                 self.context.advance()
                 return self, Token(TokenType.PlusAssign, position)
-            return self, Token(TokenType.Plus, self.context.current_position)
+            return self, Token(TokenType.Plus, position)
         elif self.match('-'):
-            if self.match_next('='):
+            self.context.advance()
+            if self.match('='):
                 self.context.advance()
                 return self, Token(TokenType.MinusAssign, position)
             return self, Token(TokenType.Minus, position)
         elif self.match('*'):
-            if self.match_next('='):
+            self.context.advance()
+            if self.match('='):
                 self.context.advance()
                 return self, Token(TokenType.MultiplyAssign, position)
-            elif self.match_next('*'):
-                position = self.context.current_position
+            elif self.match('*'):
                 self.context.advance()
-                if self.match_next('='):
+                if self.match('='):
                     self.context.advance()
                     return self, Token(TokenType.ExponentAssign, position)
                 else:
@@ -157,56 +159,69 @@ class Operators(State):
             else:
                 return self, Token(TokenType.Multiply, position)
         elif self.match('/'):
-            if self.match_next('='):
+            self.context.advance()
+            if self.match('='):
                 self.context.advance()
                 return self, Token(TokenType.DivideAssign, position)
             return self, Token(TokenType.Divide, position)
         elif self.match('%'):
-            if self.match_next('='):
+            self.context.advance()
+            if self.match('='):
                 self.context.advance()
                 return self, Token(TokenType.ModuloAssign, position)
             return self, Token(TokenType.Modulo, position)
         elif self.match('='):
-            if self.match_next('='):
+            self.context.advance()
+            if self.match('='):
                 self.context.advance()
                 return self, Token(TokenType.Equal, position)
             else:
                 return self, Token(TokenType.Assignment, position)
         elif self.match('!'):
-            if self.match_next('='):
+            self.context.advance()
+            if self.match('='):
                 self.context.advance()
                 return self, Token(TokenType.NotEqual, position)
             else:
                 return self, Token(TokenType.Error, position)
         elif self.match('<'):
-            if self.match_next('='):
+            self.context.advance()
+            if self.match('='):
                 self.context.advance()
                 return self, Token(TokenType.LessThanOrEqual, position)
             else:
                 return self, Token(TokenType.LessThan, position)
         elif self.match('>'):
-            if self.match_next('='):
+            self.context.advance()
+            if self.match('='):
                 self.context.advance()
                 return self, Token(TokenType.GreaterThanOrEqual, position)
             else:
                 return self, Token(TokenType.GreaterThan, position)
         elif self.match('.'):
+            self.context.advance()
             return self, Token(TokenType.Dot, position)
         elif self.match(':'):
+            self.context.advance()
             return self, Token(TokenType.Colon, position)
         elif self.match(','):
+            self.context.advance()
             return self, Token(TokenType.Comma, position)
 
         elif self.match('('):
+            self.context.advance()
             self.context.push_bracket(character)
             return self, Token(TokenType.LParen, position)
         elif self.match('['):
+            self.context.advance()
             self.context.push_bracket(character)
             return self, Token(TokenType.LSquare, position)
         elif self.match('{'):
+            self.context.advance()
             self.context.push_bracket(character)
             return self, Token(TokenType.LBrace, position)
         elif self.match(')'):
+            self.context.advance()
             try:
                 self.context.pop_bracket('(')
             except MismatchedBracketException as e:
@@ -214,6 +229,7 @@ class Operators(State):
             else:
                 return self, Token(TokenType.RParen, position)
         elif self.match(']'):
+            self.context.advance()
             try:
                 self.context.pop_bracket('[')
             except MismatchedBracketException as e:
@@ -221,6 +237,7 @@ class Operators(State):
             else:
                 return self, Token(TokenType.RSquare, position)
         elif self.match('}'):
+            self.context.advance()
             try:
                 self.context.pop_bracket('{')
             except MismatchedBracketException as e:

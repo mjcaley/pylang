@@ -39,8 +39,9 @@ def test_eof_transitions_to_indent(context, mocker):
     ('%=', TokenType.ModuloAssign),
     ('**=', TokenType.ExponentAssign),
 ])
-def test_call_token(context_at_current, test_input, token_type):
+def test_call_token(context_at_current, test_input, token_type, mocker):
     o = Operators(context_at_current(test_input))
+    mocker.spy(o.context, 'advance')
     result = o()
 
     assert isinstance(result[0], Operators)
@@ -48,6 +49,7 @@ def test_call_token(context_at_current, test_input, token_type):
     assert result[1].position.index == 0
     assert result[1].position.line == 1
     assert result[1].position.column == 1
+    assert o.context.advance.call_count == len(test_input)
 
 
 def test_error_with_invalid_input(context_at_current):
