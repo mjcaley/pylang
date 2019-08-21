@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-from pylang.lexer3.states import Start, Operators
-from pylang.lexer3.token import TokenType
+from pylang.lexer3.states import Start
 
 
-def test_call_to_file_start(context):
+def test_call_to_file_start(context, mocker):
     s = Start(context=context(''))
+    mocked_indent = mocker.patch('pylang.lexer3.states.FileStart')
+    called_instance = mocked_indent()()
     result = s()
 
-    assert isinstance(result[0], Operators)
-    assert result[1].token_type == TokenType.Indent
+    assert result == called_instance

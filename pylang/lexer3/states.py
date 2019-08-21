@@ -65,7 +65,10 @@ class Start(State):
 
 class FileStart(State):
     def __call__(self):
-        return Operators(self.context), Token(TokenType.Indent, None)
+        self.context.advance()
+        self.context.advance()
+
+        return Indent(self.context), Token(TokenType.Indent, None)
 
 
 class Indent(State):
