@@ -152,3 +152,24 @@ def test_digit_transitions_to_number_state(context_at_current, mocker, test_inpu
     result = o()
 
     assert result == called_instance
+
+
+def test_double_quote_transitions_to_string_state(context_at_current, mocker):
+    o = Operators(context_at_current('"'))
+    mocked_string = mocker.patch('pylang.lexer3.states.String')
+    called_instance = mocked_string()()
+    result = o()
+
+    assert result == called_instance
+
+
+@pytest.mark.parametrize('test_input', [
+    'a', 'b', 'c', '_'
+])
+def test_non_reserved_character_or_digit_transitions_to_word_state(context_at_current, mocker, test_input):
+    o = Operators(context_at_current('a'))
+    mocked_word = mocker.patch('pylang.lexer3.states.Word')
+    called_instance = mocked_word()()
+    result = o()
+    
+    assert result == called_instance

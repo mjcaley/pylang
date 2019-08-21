@@ -257,6 +257,14 @@ class Operators(State):
             state = Number(self.context)
             return state()
 
+        elif self.match('"'):
+            state = String(self.context)
+            return state()
+
+        elif not self.current_in(RESERVED_CHARACTERS + list(digits)):
+            state = Word(self.context)
+            return state()
+
 
 class Number(State):
     def consume_number(self, characters):
