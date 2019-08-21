@@ -283,6 +283,50 @@ class Number(State):
             return Indent(self.context), Token(TokenType.Integer, position, first_number)
 
 
+class String(State):
+    ESCAPE_CHARS = {
+        'a': '\a',
+        'b': '\b',
+        'f': '\f',
+        'n': '\n',
+        'r': '\r',
+        't': '\t',
+        'v': '\v',
+        '\\': '\\',
+        '"': '"',
+    }
+
+    def __call__(self):
+        position = self.context.current_position
+
+        self.context.advance()
+
+        value = ''
+        while not self.eof:
+            if self.match('"'):
+                self.context.advance()
+                return Indent(self.context), Token(TokenType.String, position, value)
+            elif self.current_in(NEWLINE):
+                return Indent(self.context), Token(TokenType.Error, self.context.current_position)
+            elif self.match('\\'):
+                # Expect a escape character
+                self.context.advance()
+                if self.current_in(self.ESCAPE_CHARS.keys()):
+                    value += self.ESCAPE_CHARS[self.context.current]
+                    self.context.advance()
+                else:
+                    return (
+                        Indent(self.context),
+                        Token(TokenType.Error, self.context.current_position, 'Unknown escape character')
+                    )
+            else:
+                value += self.context.current
+                self.context.advance()
+
+        if self.eof:
+            return Indent(self.context), Token(TokenType.Error, position)
+
+
 class FileEnd(State):
     def __call__(self):
         state = End(self.context)
