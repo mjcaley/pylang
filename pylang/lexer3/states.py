@@ -2,7 +2,7 @@
 
 from string import digits, hexdigits, octdigits
 
-from .characters import INDENT, NEWLINE, WHITESPACE
+from .characters import INDENT, NEWLINE, RESERVED_CHARACTERS, WHITESPACE
 from .exceptions import InvalidNumberInputException, MismatchedBracketException, MismatchedIndentException
 from .token import Token, TokenType
 
@@ -354,6 +354,14 @@ class String(State):
 
         if self.eof:
             return Indent(self.context), Token(TokenType.Error, position)
+
+
+class Word(State):
+    def __call__(self):
+        position = self.context.current_position
+        value = self.append_while_not(RESERVED_CHARACTERS)
+
+        return Indent(self.context), Token(TokenType.Identifier, position, value)
 
 
 class FileEnd(State):
