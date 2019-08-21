@@ -132,121 +132,122 @@ class Operators(State):
             state = Indent(self.context)
             return state()
 
+        indent = Indent(self.context)
         if self.match('+'):
             self.context.advance()
             if self.match('='):
                 self.context.advance()
-                return self, Token(TokenType.PlusAssign, position)
-            return self, Token(TokenType.Plus, position)
+                return indent, Token(TokenType.PlusAssign, position)
+            return indent, Token(TokenType.Plus, position)
         elif self.match('-'):
             self.context.advance()
             if self.match('='):
                 self.context.advance()
-                return self, Token(TokenType.MinusAssign, position)
-            return self, Token(TokenType.Minus, position)
+                return indent, Token(TokenType.MinusAssign, position)
+            return indent, Token(TokenType.Minus, position)
         elif self.match('*'):
             self.context.advance()
             if self.match('='):
                 self.context.advance()
-                return self, Token(TokenType.MultiplyAssign, position)
+                return indent, Token(TokenType.MultiplyAssign, position)
             elif self.match('*'):
                 self.context.advance()
                 if self.match('='):
                     self.context.advance()
-                    return self, Token(TokenType.ExponentAssign, position)
+                    return indent, Token(TokenType.ExponentAssign, position)
                 else:
-                    return self, Token(TokenType.Exponent, position)
+                    return indent, Token(TokenType.Exponent, position)
             else:
-                return self, Token(TokenType.Multiply, position)
+                return indent, Token(TokenType.Multiply, position)
         elif self.match('/'):
             self.context.advance()
             if self.match('='):
                 self.context.advance()
-                return self, Token(TokenType.DivideAssign, position)
-            return self, Token(TokenType.Divide, position)
+                return indent, Token(TokenType.DivideAssign, position)
+            return indent, Token(TokenType.Divide, position)
         elif self.match('%'):
             self.context.advance()
             if self.match('='):
                 self.context.advance()
-                return self, Token(TokenType.ModuloAssign, position)
-            return self, Token(TokenType.Modulo, position)
+                return indent, Token(TokenType.ModuloAssign, position)
+            return indent, Token(TokenType.Modulo, position)
         elif self.match('='):
             self.context.advance()
             if self.match('='):
                 self.context.advance()
-                return self, Token(TokenType.Equal, position)
+                return indent, Token(TokenType.Equal, position)
             else:
-                return self, Token(TokenType.Assignment, position)
+                return indent, Token(TokenType.Assignment, position)
         elif self.match('!'):
             self.context.advance()
             if self.match('='):
                 self.context.advance()
-                return self, Token(TokenType.NotEqual, position)
+                return indent, Token(TokenType.NotEqual, position)
             else:
-                return self, Token(TokenType.Error, position)
+                return indent, Token(TokenType.Error, position)
         elif self.match('<'):
             self.context.advance()
             if self.match('='):
                 self.context.advance()
-                return self, Token(TokenType.LessThanOrEqual, position)
+                return indent, Token(TokenType.LessThanOrEqual, position)
             else:
-                return self, Token(TokenType.LessThan, position)
+                return indent, Token(TokenType.LessThan, position)
         elif self.match('>'):
             self.context.advance()
             if self.match('='):
                 self.context.advance()
-                return self, Token(TokenType.GreaterThanOrEqual, position)
+                return indent, Token(TokenType.GreaterThanOrEqual, position)
             else:
-                return self, Token(TokenType.GreaterThan, position)
+                return indent, Token(TokenType.GreaterThan, position)
         elif self.match('.'):
             self.context.advance()
-            return self, Token(TokenType.Dot, position)
+            return indent, Token(TokenType.Dot, position)
         elif self.match(':'):
             self.context.advance()
-            return self, Token(TokenType.Colon, position)
+            return indent, Token(TokenType.Colon, position)
         elif self.match(','):
             self.context.advance()
-            return self, Token(TokenType.Comma, position)
+            return indent, Token(TokenType.Comma, position)
 
         elif self.match('('):
             self.context.advance()
             self.context.push_bracket(character)
-            return self, Token(TokenType.LParen, position)
+            return indent, Token(TokenType.LParen, position)
         elif self.match('['):
             self.context.advance()
             self.context.push_bracket(character)
-            return self, Token(TokenType.LSquare, position)
+            return indent, Token(TokenType.LSquare, position)
         elif self.match('{'):
             self.context.advance()
             self.context.push_bracket(character)
-            return self, Token(TokenType.LBrace, position)
+            return indent, Token(TokenType.LBrace, position)
         elif self.match(')'):
             self.context.advance()
             try:
                 self.context.pop_bracket('(')
             except MismatchedBracketException as e:
-                return self, Token(TokenType.Error, position, f'Opening bracket was {e.expected}')
+                return indent, Token(TokenType.Error, position, f'Opening bracket was {e.expected}')
             else:
-                return self, Token(TokenType.RParen, position)
+                return indent, Token(TokenType.RParen, position)
         elif self.match(']'):
             self.context.advance()
             try:
                 self.context.pop_bracket('[')
             except MismatchedBracketException as e:
-                return self, Token(TokenType.Error, position, f'Opening bracket was {e.expected}')
+                return indent, Token(TokenType.Error, position, f'Opening bracket was {e.expected}')
             else:
-                return self, Token(TokenType.RSquare, position)
+                return indent, Token(TokenType.RSquare, position)
         elif self.match('}'):
             self.context.advance()
             try:
                 self.context.pop_bracket('{')
             except MismatchedBracketException as e:
-                return self, Token(TokenType.Error, position, f'Opening bracket was {e.expected}')
+                return indent, Token(TokenType.Error, position, f'Opening bracket was {e.expected}')
             else:
-                return self, Token(TokenType.RBrace, position)
+                return indent, Token(TokenType.RBrace, position)
         elif self.match('\n'):
             self.context.advance()
-            return self, Token(TokenType.Newline, position)
+            return indent, Token(TokenType.Newline, position)
 
         elif self.current_in(digits):
             state = Number(self.context)

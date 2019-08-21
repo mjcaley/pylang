@@ -41,10 +41,12 @@ def test_eof_transitions_to_indent(context, mocker):
 ])
 def test_call_token(context_at_current, test_input, token_type, mocker):
     o = Operators(context_at_current(test_input))
+    mocked_indent = mocker.patch('pylang.lexer3.states.Indent')
+    instance = mocked_indent()
     mocker.spy(o.context, 'advance')
     result = o()
 
-    assert isinstance(result[0], Operators)
+    assert result[0] == instance
     assert result[1].token_type == token_type
     assert result[1].position.index == 0
     assert result[1].position.line == 1
@@ -54,10 +56,12 @@ def test_call_token(context_at_current, test_input, token_type, mocker):
 
 def test_call_newline(context_at_current, mocker):
     o = Operators(context_at_current('\n'))
+    mocked_indent = mocker.patch('pylang.lexer3.states.Indent')
+    instance = mocked_indent()
     mocker.spy(o.context, 'advance')
     result = o()
 
-    assert isinstance(result[0], Operators)
+    assert result[0] == instance
     assert result[1].token_type == TokenType.Newline
     assert result[1].position.index == 0
     assert result[1].position.line == 1
@@ -65,11 +69,13 @@ def test_call_newline(context_at_current, mocker):
     assert o.context.advance.call_count == 1
 
 
-def test_error_with_invalid_input(context_at_current):
+def test_error_with_invalid_input(context_at_current, mocker):
     o = Operators(context_at_current('!'))
+    mocked_indent = mocker.patch('pylang.lexer3.states.Indent')
+    instance = mocked_indent()
     result = o()
 
-    assert isinstance(result[0], Operators)
+    assert result[0] == instance
     assert result[1].token_type == TokenType.Error
     assert result[1].position.index == 0
     assert result[1].position.line == 1
@@ -83,10 +89,12 @@ def test_error_with_invalid_input(context_at_current):
 ])
 def test_call_left_bracket(mocker, context_at_current, test_input, token_type):
     o = Operators(context_at_current(test_input))
+    mocked_indent = mocker.patch('pylang.lexer3.states.Indent')
+    instance = mocked_indent()
     mocker.spy(o.context, 'push_bracket')
     result = o()
 
-    assert isinstance(result[0], Operators)
+    assert result[0] == instance
     assert result[1].token_type == token_type
     assert result[1].position.index == 0
     assert result[1].position.line == 1
@@ -102,10 +110,12 @@ def test_call_left_bracket(mocker, context_at_current, test_input, token_type):
 def test_call_right_bracket(mocker, context_at_current, test_input, left_bracket, token_type):
     o = Operators(context_at_current(test_input))
     o.context.push_bracket(left_bracket)
+    mocked_indent = mocker.patch('pylang.lexer3.states.Indent')
+    instance = mocked_indent()
     mocker.spy(o.context, 'pop_bracket')
     result = o()
 
-    assert isinstance(result[0], Operators)
+    assert result[0] == instance
     assert result[1].token_type == token_type
     assert result[1].position.index == 0
     assert result[1].position.line == 1
@@ -119,10 +129,12 @@ def test_call_right_bracket(mocker, context_at_current, test_input, left_bracket
 def test_right_bracket_mismatched(mocker, context_at_current, test_input):
     o = Operators(context_at_current(test_input))
     o.context.push_bracket('\0')
+    mocked_indent = mocker.patch('pylang.lexer3.states.Indent')
+    instance = mocked_indent()
     mocker.spy(o.context, 'pop_bracket')
     result = o()
 
-    assert isinstance(result[0], Operators)
+    assert result[0] == instance
     assert result[1].token_type == TokenType.Error
     assert result[1].position.index == 0
     assert result[1].position.line == 1
