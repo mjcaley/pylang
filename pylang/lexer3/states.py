@@ -360,8 +360,36 @@ class Word(State):
     def __call__(self):
         position = self.context.current_position
         value = self.append_while_not(RESERVED_CHARACTERS)
+        indent = Indent(self.context)
 
-        return Indent(self.context), Token(TokenType.Identifier, position, value)
+        if value == 'func':
+            return indent, Token(TokenType.Function, position, value)
+        elif value == 'struct':
+            return indent, Token(TokenType.Struct, position, value)
+        elif value == 'if':
+            return indent, Token(TokenType.If, position, value)
+        elif value == 'elif':
+            return indent, Token(TokenType.ElseIf, position, value)
+        elif value == 'else':
+            return indent, Token(TokenType.Else, position, value)
+        elif value == 'while':
+            return indent, Token(TokenType.While, position, value)
+        elif value == 'for':
+            return indent, Token(TokenType.ForEach, position, value)
+        elif value == 'and':
+            return indent, Token(TokenType.And, position, value)
+        elif value == 'not':
+            return indent, Token(TokenType.Not, position, value)
+        elif value == 'or':
+            return indent, Token(TokenType.Or, position, value)
+        elif value == 'true':
+            return indent, Token(TokenType.True_, position, value)
+        elif value == 'false':
+            return indent, Token(TokenType.False_, position, value)
+        elif value == 'return':
+            return indent, Token(TokenType.Return, position, value)
+        else:
+            return indent, Token(TokenType.Identifier, position, value)
 
 
 class FileEnd(State):
