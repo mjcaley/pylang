@@ -117,7 +117,9 @@ def test_eof_with_whitespace_transitions_to_dedent(context_at_current, mocker):
 
 @pytest.mark.xfail
 def test_blank_lines_dont_raise_recursion_error(context_at_current, mocker):
-    blank_lines = ('          \n' * 1_000_000) + '123'
+    import sys
+
+    blank_lines = (' \n' * sys.getrecursionlimit()) + '123'
     i = Indent(context_at_current(blank_lines))
     i.context.push_indent(0)
     mocked_operators = mocker.patch('pylang.lexer.states.Operators')
