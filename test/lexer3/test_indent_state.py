@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import pytest
+
 from pylang.lexer3.states import Indent
 from pylang.lexer3.token import TokenType
 
@@ -108,6 +110,18 @@ def test_eof_with_whitespace_transitions_to_dedent(context_at_current, mocker):
     i.context.push_indent(0)
     mocked_dedent = mocker.patch('pylang.lexer3.states.Dedent')
     called_instance = mocked_dedent()()
+    result = i()
+
+    assert result == called_instance
+
+
+@pytest.mark.xfail
+def test_blank_lines_dont_raise_recursion_error(context_at_current, mocker):
+    blank_lines = ('          \n' * 1_000_000) + '123'
+    i = Indent(context_at_current(blank_lines))
+    i.context.push_indent(0)
+    mocked_operators = mocker.patch('pylang.lexer3.states.Operators')
+    called_instance = mocked_operators()()
     result = i()
 
     assert result == called_instance

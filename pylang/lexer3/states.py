@@ -97,7 +97,7 @@ class Indent(State):
         # Skip blank lines
         if self.current_in(NEWLINE):
             self.context.advance()
-            return self()
+            return self()   # TODO: This will cause a RecursionError if there's enough blank lines
 
         if whitespace > self.context.indent:
             self.context.push_indent(whitespace)
