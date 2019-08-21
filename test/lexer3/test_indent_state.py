@@ -35,6 +35,19 @@ def test_transition_when_in_bracket(context_at_current, mocker):
     assert result == called_instance
 
 
+def test_skip_whitespace_after_indent(context_at_current, mocker):
+    indent = '    '
+    whitespace = '\v\f'
+    i = Indent(context_at_current(indent + whitespace + '+'))
+    i.context.push_indent(0)
+    mocker.patch('pylang.lexer3.states.Operators')
+    mocker.spy(i.context, 'advance')
+    i()
+
+    assert i.context.indent == len(indent)
+    assert i.context.advance.call_count == len(indent + whitespace)
+
+
 def test_skip_empty_line(context_at_current, mocker):
     i = Indent(context_at_current('    \n+'))
     i.context.push_indent(0)

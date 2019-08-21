@@ -30,7 +30,7 @@ class State:
             self.context.advance()
 
     def skip_while(self, characters):
-        while self.context.current in characters or not self.context.current:
+        while self.context.current in characters and self.context.current:
             self.context.advance()
 
     def skip_whitespace(self):
@@ -79,6 +79,7 @@ class Indent(State):
     def __call__(self):
         position = self.context.current_position
         whitespace = len(self.append_while(INDENT))
+        self.skip_whitespace()
 
         if self.eof:
             state = Dedent(self.context, target_indent=0)
