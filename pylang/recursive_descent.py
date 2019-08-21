@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-from .lexer import TokenType
-from .parse_tree import FunctionDecl, Function, Boolean, Integer, Float, Identifier, UnaryExpression, ProductExpression, \
-    SumExpression, AssignmentExpression
+from .lexer3.token import TokenType
+from .parse_tree import FunctionDecl, Function, Boolean, Integer, Float, Identifier, UnaryExpression, \
+    ProductExpression, SumExpression, AssignmentExpression
 
 
 class ParserException(Exception):
@@ -269,24 +269,10 @@ class Parser:
             return Boolean(self.consume_try(TokenType.False_))
 
     def integer(self):
-        return Integer(value=self.consume_try(TokenType.Digits))
+        return Integer(value=self.consume_try(TokenType.Integer))
 
     def float(self):
-        if self.match(TokenType.Dot, TokenType.Digits):
-            start = self.consume()
-            right = self.consume()
-            start.value = float('0.' + str(right.value))
-
-            return Float(value=start)
-        elif self.match(TokenType.Digits, TokenType.Dot):
-            start = self.consume()
-            self.consume()
-            right = self.consume_try(TokenType.Digits)
-            start.value = float(str(start.value) + '.' + str(right.value))
-
-            return Float(value=start)
-        else:
-            raise UnexpectedTokenError(expected=TokenType.Digits, received=self.current)
+        return Float(value=self.consume_try(TokenType.Float))
 
     def identifier(self):
         return Identifier(value=self.consume_try(TokenType.Identifier))
