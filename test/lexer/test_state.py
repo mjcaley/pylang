@@ -4,8 +4,8 @@ from string import digits
 
 import pytest
 
-from pylang.lexer3.characters import WHITESPACE
-from pylang.lexer3.states import State
+from pylang.lexer.characters import WHITESPACE
+from pylang.lexer.states import State
 
 
 @pytest.mark.parametrize('test_input', [

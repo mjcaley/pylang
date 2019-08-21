@@ -2,7 +2,7 @@
 
 import pytest
 
-from pylang.lexer import Lexer
+from pylang.lexer.lexer import Lexer
 from pylang.recursive_descent import Parser, UnexpectedTokenError
 from pylang.parse_tree import Identifier
 
@@ -15,8 +15,8 @@ from pylang.parse_tree import Identifier
     '\N{SIGN OF THE HORNS}'
 ])
 def test_identifier(test_input):
-    l = Lexer(test_input)
-    l.emit()
+    l = Lexer.from_stream(test_input)
+    next(l)
     p = Parser(lexer=l)
 
     result = p.identifier()
@@ -42,8 +42,8 @@ def test_identifier(test_input):
     'not'
 ])
 def test_not_identifier(test_input):
-    l = Lexer(test_input)
-    l.emit()
+    l = Lexer.from_stream(test_input)
+    next(l)
     p = Parser(lexer=l)
 
     with pytest.raises(UnexpectedTokenError):

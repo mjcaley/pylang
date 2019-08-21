@@ -2,13 +2,13 @@
 
 import pytest
 
-from pylang.lexer3.states import Word
-from pylang.lexer3.token import TokenType
+from pylang.lexer.states import Word
+from pylang.lexer.token import TokenType
 
 
 def test_returns_identifier(context_at_current, mocker):
     w = Word(context_at_current('a'))
-    mocked_indent = mocker.patch('pylang.lexer3.states.Indent')
+    mocked_indent = mocker.patch('pylang.lexer.states.Indent')
     instance = mocked_indent()
     mocker.spy(w.context, 'advance')
     result = w()
@@ -38,7 +38,7 @@ def test_returns_identifier(context_at_current, mocker):
 ])
 def test_returns_keyword(context_at_current, test_input, expected, mocker):
     w = Word(context_at_current(test_input))
-    mocked_indent = mocker.patch('pylang.lexer3.states.Indent')
+    mocked_indent = mocker.patch('pylang.lexer.states.Indent')
     instance = mocked_indent()
     mocker.spy(w.context, 'advance')
     result = w()

@@ -2,7 +2,7 @@
 
 import pytest
 
-from pylang.lexer3.stream import Stream
+from pylang.lexer.stream import Stream
 
 from io import StringIO
 

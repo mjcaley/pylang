@@ -2,7 +2,7 @@
 
 import pytest
 
-from pylang.lexer3.states import End
+from pylang.lexer.states import End
 
 
 def test_raise_stop_iteration():

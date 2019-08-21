@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from .lexer3.token import TokenType
+from .lexer.token import TokenType
 from .parse_tree import FunctionDecl, Function, Boolean, Integer, Float, Identifier, UnaryExpression, \
     ProductExpression, SumExpression, AssignmentExpression
 
@@ -178,8 +178,7 @@ class Parser:
         statements = []
 
         self.consume_try(TokenType.Indent)
-        while not self.match(TokenType.Dedent) and \
-                not self.match(TokenType.EOF):
+        while not self.match(TokenType.Dedent):
             statements.append(self.statement())
         self.consume_try(TokenType.Dedent)
 

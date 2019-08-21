@@ -2,14 +2,14 @@
 
 import pytest
 
-from pylang.lexer3.states import Indent
-from pylang.lexer3.token import TokenType
+from pylang.lexer.states import Indent
+from pylang.lexer.token import TokenType
 
 
 def test_transition_when_not_at_beginning(context_at_position, mocker):
     i = Indent(context_at_position('+++', 3))
     i.context.push_indent(0)
-    mocked_operators = mocker.patch('pylang.lexer3.states.Operators')
+    mocked_operators = mocker.patch('pylang.lexer.states.Operators')
     called_instance = mocked_operators()()
     result = i()
 
@@ -19,7 +19,7 @@ def test_transition_when_not_at_beginning(context_at_position, mocker):
 def test_transition_on_non_whitespace(context_at_current, mocker):
     i = Indent(context_at_current('+'))
     i.context.push_indent(0)
-    mocked_operators = mocker.patch('pylang.lexer3.states.Operators')
+    mocked_operators = mocker.patch('pylang.lexer.states.Operators')
     called_instance = mocked_operators()()
     result = i()
 
@@ -30,7 +30,7 @@ def test_transition_when_in_bracket(context_at_current, mocker):
     i = Indent(context_at_current('    +)'))
     i.context.push_indent(0)
     i.context.push_bracket('(')
-    mocked_operators = mocker.patch('pylang.lexer3.states.Operators')
+    mocked_operators = mocker.patch('pylang.lexer.states.Operators')
     called_instance = mocked_operators()()
     result = i()
 
@@ -42,7 +42,7 @@ def test_skip_whitespace_after_indent(context_at_current, mocker):
     whitespace = '\v\f'
     i = Indent(context_at_current(indent + whitespace + '+'))
     i.context.push_indent(0)
-    mocker.patch('pylang.lexer3.states.Operators')
+    mocker.patch('pylang.lexer.states.Operators')
     mocker.spy(i.context, 'advance')
     i()
 
@@ -53,7 +53,7 @@ def test_skip_whitespace_after_indent(context_at_current, mocker):
 def test_skip_empty_line(context_at_current, mocker):
     i = Indent(context_at_current('    \n+'))
     i.context.push_indent(0)
-    mocked_operators = mocker.patch('pylang.lexer3.states.Operators')
+    mocked_operators = mocker.patch('pylang.lexer.states.Operators')
     called_instance = mocked_operators()()
     result = i()
 
@@ -64,7 +64,7 @@ def test_indent(context_at_position, mocker):
     i = Indent(context_at_position('\n    +', 3))
     i.context.push_indent(0)
     mocker.spy(i.context, 'push_indent')
-    mocked_operators = mocker.patch('pylang.lexer3.states.Operators')
+    mocked_operators = mocker.patch('pylang.lexer.states.Operators')
     instance = mocked_operators()
     result = i()
 
@@ -77,7 +77,7 @@ def test_same_indent(context_at_position, mocker):
     i.context.push_indent(0)
     i.context.push_indent(4)
     mocker.spy(i.context, 'push_indent')
-    mocked_operators = mocker.patch('pylang.lexer3.states.Operators')
+    mocked_operators = mocker.patch('pylang.lexer.states.Operators')
     called_instance = mocked_operators()()
     result = i()
 
@@ -88,7 +88,7 @@ def test_dedent(context_at_position, mocker):
     i = Indent(context_at_position('\n    +', 3))
     i.context.push_indent(0)
     i.context.push_indent(8)
-    mocked_dedent = mocker.patch('pylang.lexer3.states.Dedent')
+    mocked_dedent = mocker.patch('pylang.lexer.states.Dedent')
     called_instance = mocked_dedent()()
     result = i()
 
@@ -98,7 +98,7 @@ def test_dedent(context_at_position, mocker):
 def test_eof_transitions_to_dedent(context_at_current, mocker):
     i = Indent(context_at_current(''))
     i.context.push_indent(0)
-    mocked_dedent = mocker.patch('pylang.lexer3.states.Dedent')
+    mocked_dedent = mocker.patch('pylang.lexer.states.Dedent')
     called_instance = mocked_dedent()()
     result = i()
 
@@ -108,7 +108,7 @@ def test_eof_transitions_to_dedent(context_at_current, mocker):
 def test_eof_with_whitespace_transitions_to_dedent(context_at_current, mocker):
     i = Indent(context_at_current('    '))
     i.context.push_indent(0)
-    mocked_dedent = mocker.patch('pylang.lexer3.states.Dedent')
+    mocked_dedent = mocker.patch('pylang.lexer.states.Dedent')
     called_instance = mocked_dedent()()
     result = i()
 
@@ -120,7 +120,7 @@ def test_blank_lines_dont_raise_recursion_error(context_at_current, mocker):
     blank_lines = ('          \n' * 1_000_000) + '123'
     i = Indent(context_at_current(blank_lines))
     i.context.push_indent(0)
-    mocked_operators = mocker.patch('pylang.lexer3.states.Operators')
+    mocked_operators = mocker.patch('pylang.lexer.states.Operators')
     called_instance = mocked_operators()()
     result = i()
 

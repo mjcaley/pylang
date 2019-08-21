@@ -4,9 +4,9 @@ import pytest
 
 from string import digits
 
-from pylang.lexer3.exceptions import InvalidNumberInputException
-from pylang.lexer3.states import Number
-from pylang.lexer3.token import TokenType
+from pylang.lexer.exceptions import InvalidNumberInputException
+from pylang.lexer.states import Number
+from pylang.lexer.token import TokenType
 
 
 @pytest.mark.parametrize('test_input', [
@@ -71,7 +71,7 @@ def test_read_number_raises(context_at_current, test_input):
 ])
 def test_call_integer_token(context_at_current, test_input, token_type, mocker):
     n = Number(context_at_current(test_input))
-    mocked_indent = mocker.patch('pylang.lexer3.states.Indent')
+    mocked_indent = mocker.patch('pylang.lexer.states.Indent')
     instance = mocked_indent()
     result = n()
 
@@ -96,7 +96,7 @@ def test_call_integer_token(context_at_current, test_input, token_type, mocker):
 ])
 def test_call_float_token(context_at_current, test_input, mocker):
     n = Number(context_at_current(test_input))
-    mocked_indent = mocker.patch('pylang.lexer3.states.Indent')
+    mocked_indent = mocker.patch('pylang.lexer.states.Indent')
     instance = mocked_indent()
     result = n()
 
@@ -110,7 +110,7 @@ def test_call_float_token(context_at_current, test_input, mocker):
 
 def test_call_error_token(context_at_current, mocker):
     n = Number(context_at_current('a123'))
-    mocked_indent = mocker.patch('pylang.lexer3.states.Indent')
+    mocked_indent = mocker.patch('pylang.lexer.states.Indent')
     instance = mocked_indent()
     result = n()
 

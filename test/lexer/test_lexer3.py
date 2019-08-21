@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-from pylang.lexer3.context import Context
-from pylang.lexer3.lexer import Lexer
-from pylang.lexer3.states import Start
+from pylang.lexer.context import Context
+from pylang.lexer.lexer import Lexer
+from pylang.lexer.states import Start
 
 
 def test_from_stream():

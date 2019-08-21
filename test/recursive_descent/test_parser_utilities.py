@@ -2,7 +2,8 @@
 
 import pytest
 
-from pylang.lexer import Token, TokenType, Position
+from pylang.lexer.token import Token, TokenType
+from pylang.lexer.stream import Position
 from pylang.recursive_descent import Parser, UnexpectedTokenError
 
 
@@ -10,9 +11,9 @@ from pylang.recursive_descent import Parser, UnexpectedTokenError
 def lexer_digits():
     return [
         Token(TokenType.Indent, Position(0, 1, 1)),
-        Token(TokenType.Digits, Position(1, 1, 2), 1),
+        Token(TokenType.Integer, Position(1, 1, 2), 1),
+        Token(TokenType.Float, Position(1, 1, 2), 1),
         Token(TokenType.Dedent, Position(2, 1, 3)),
-        Token(TokenType.EOF, Position(3, 2, 1))
     ]
 
 
@@ -25,7 +26,7 @@ def test_current(lexer_digits):
 def test_next(lexer_digits):
     p = Parser(lexer_digits)
 
-    assert p.next.token_type == TokenType.Digits
+    assert p.next.token_type == TokenType.Integer
     assert p.next.value == 1
 
 
@@ -38,21 +39,21 @@ def test_match_current(lexer_digits):
 def test_match_next(lexer_digits):
     p = Parser(lexer_digits)
 
-    assert p.match_next(TokenType.Digits) is True
+    assert p.match_next(TokenType.Integer) is True
 
 
 def test_match(lexer_digits):
     p = Parser(lexer_digits)
 
     assert p.match(current_type=TokenType.Indent)
-    assert p.match(current_type=TokenType.Indent, next_type=TokenType.Digits)
+    assert p.match(current_type=TokenType.Indent, next_type=TokenType.Integer)
 
 
 def test_advance(lexer_digits):
     p = Parser(lexer_digits)
     token = p.advance()
 
-    assert token.token_type == TokenType.Digits
+    assert token.token_type == TokenType.Integer
     assert token.value == 1
     assert p.current == token
 
@@ -104,14 +105,14 @@ def test_consume_if2_success_multiple(lexer_digits):
 
 def test_consume_if2_fail_first(lexer_digits):
     p = Parser(lexer_digits)
-    result = p.consume_if2(TokenType.EOF)
+    result = p.consume_if2(TokenType.Error)
 
     assert len(result) == 0
 
 
 def test_consume_if2_fail_partial(lexer_digits):
     p = Parser(lexer_digits)
-    result = p.consume_if2(TokenType.Indent, TokenType.Digits, TokenType.Digits)
+    result = p.consume_if2(TokenType.Indent, TokenType.Integer, TokenType.Integer)
 
     assert result[0] == lexer_digits[0]
     assert result[1] == lexer_digits[1]
@@ -128,7 +129,7 @@ def test_consume_try2_success_one(lexer_digits):
 
 def test_consume_try2_success_multiple(lexer_digits):
     p = Parser(lexer_digits)
-    result = p.consume_try2(TokenType.Indent, TokenType.Digits, TokenType.Dedent)
+    result = p.consume_try2(TokenType.Indent, TokenType.Integer, TokenType.Dedent)
 
     assert result[0] == lexer_digits[0]
     assert result[1] == lexer_digits[1]
@@ -137,9 +138,9 @@ def test_consume_try2_success_multiple(lexer_digits):
 
 
 @pytest.mark.parametrize('test_input', [
-    [TokenType.EOF],
-    [TokenType.Indent, TokenType.EOF],
-    [TokenType.Indent, TokenType.Digits, TokenType.Dedent, TokenType.Indent],
+    [TokenType.Error],
+    [TokenType.Indent, TokenType.Error],
+    [TokenType.Indent, TokenType.Integer, TokenType.Dedent, TokenType.Indent],
 ])
 def test_consume_try2_fails(test_input, lexer_digits):
     p = Parser(lexer_digits)

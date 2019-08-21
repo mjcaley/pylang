@@ -19,8 +19,8 @@ def parser():
 
 @pytest.fixture
 def context():
-    from pylang.lexer3.context import Context
-    from pylang.lexer3.stream import Stream
+    from pylang.lexer.context import Context
+    from pylang.lexer.stream import Stream
 
     def inner(data):
         return Context(Stream(data))

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
-from pylang.lexer3.states import Dedent
-from pylang.lexer3.token import TokenType
+from pylang.lexer.states import Dedent
+from pylang.lexer.token import TokenType
 
 
 def test_call_transition_to_indent_when_done(mocker, context_at_current):
     d = Dedent(context_at_current('x'), target_indent=0)
     d.context.push_indent(0)
-    mocked_indent = mocker.patch('pylang.lexer3.states.Indent')
+    mocked_indent = mocker.patch('pylang.lexer.states.Indent')
     d()
 
     assert mocked_indent.called
@@ -16,7 +16,7 @@ def test_call_transition_to_indent_when_done(mocker, context_at_current):
 def test_call_transition_to_file_end_when_eof(mocker, context_at_current):
     d = Dedent(context_at_current(''), target_indent=0)
     d.context.push_indent(0)
-    mocked_fileend = mocker.patch('pylang.lexer3.states.FileEnd')
+    mocked_fileend = mocker.patch('pylang.lexer.states.FileEnd')
     d()
 
     assert mocked_fileend.called
@@ -40,7 +40,7 @@ def test_call_dumps_multiple_dedents(mocker, context_at_current):
     d.context.push_indent(4)
     d.context.push_indent(8)
     d.context.push_indent(12)
-    mocked_fileend = mocker.patch('pylang.lexer3.states.FileEnd')
+    mocked_fileend = mocker.patch('pylang.lexer.states.FileEnd')
     mocker.spy(d.context, 'pop_indent')
     result1 = d()
     result2 = d()

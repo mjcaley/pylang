@@ -2,9 +2,9 @@
 
 import pytest
 
-from pylang.lexer3.exceptions import MismatchedBracketException,  MismatchedIndentException
-from pylang.lexer3.context import Context
-from pylang.lexer3.stream import Position, Stream
+from pylang.lexer.exceptions import MismatchedBracketException,  MismatchedIndentException
+from pylang.lexer.context import Context
+from pylang.lexer.stream import Position, Stream
 
 
 def test_init(mocker):

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-from pylang.lexer3.states import FileStart
-from pylang.lexer3.token import TokenType
+from pylang.lexer.states import FileStart
+from pylang.lexer.token import TokenType
 
 
 def test_call_returns_indent_state(context, mocker):
     s = FileStart(context(''))
-    mocked_indent = mocker.patch('pylang.lexer3.states.Indent')
+    mocked_indent = mocker.patch('pylang.lexer.states.Indent')
     instance = mocked_indent()
     mocker.spy(s.context, 'advance')
     mocker.spy(s.context, 'push_indent')

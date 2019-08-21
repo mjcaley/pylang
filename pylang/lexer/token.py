@@ -66,8 +66,6 @@ class TokenType(Enum):
     Colon = ':'
     Comma = ','
 
-    EOF = auto()
-
     Error = auto()
 
 

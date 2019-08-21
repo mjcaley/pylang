@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import Optional, Sequence
 
-from .lexer import Token
+from .lexer.token import Token
 
 
 class Expression:

@@ -2,13 +2,13 @@
 
 import pytest
 
-from pylang.lexer3.states import Operators
-from pylang.lexer3.token import TokenType
+from pylang.lexer.states import Operators
+from pylang.lexer.token import TokenType
 
 
 def test_eof_transitions_to_indent(context, mocker):
     o = Operators(context(''))
-    mocked_indent = mocker.patch('pylang.lexer3.states.Indent')
+    mocked_indent = mocker.patch('pylang.lexer.states.Indent')
     called_instance = mocked_indent()()
     result = o()
 
@@ -41,7 +41,7 @@ def test_eof_transitions_to_indent(context, mocker):
 ])
 def test_call_token(context_at_current, test_input, token_type, mocker):
     o = Operators(context_at_current(test_input))
-    mocked_indent = mocker.patch('pylang.lexer3.states.Indent')
+    mocked_indent = mocker.patch('pylang.lexer.states.Indent')
     instance = mocked_indent()
     mocker.spy(o.context, 'advance')
     result = o()
@@ -56,7 +56,7 @@ def test_call_token(context_at_current, test_input, token_type, mocker):
 
 def test_call_newline(context_at_current, mocker):
     o = Operators(context_at_current('\n'))
-    mocked_indent = mocker.patch('pylang.lexer3.states.Indent')
+    mocked_indent = mocker.patch('pylang.lexer.states.Indent')
     instance = mocked_indent()
     mocker.spy(o.context, 'advance')
     result = o()
@@ -71,7 +71,7 @@ def test_call_newline(context_at_current, mocker):
 
 def test_error_with_invalid_input(context_at_current, mocker):
     o = Operators(context_at_current('!'))
-    mocked_indent = mocker.patch('pylang.lexer3.states.Indent')
+    mocked_indent = mocker.patch('pylang.lexer.states.Indent')
     instance = mocked_indent()
     result = o()
 
@@ -89,7 +89,7 @@ def test_error_with_invalid_input(context_at_current, mocker):
 ])
 def test_call_left_bracket(mocker, context_at_current, test_input, token_type):
     o = Operators(context_at_current(test_input))
-    mocked_indent = mocker.patch('pylang.lexer3.states.Indent')
+    mocked_indent = mocker.patch('pylang.lexer.states.Indent')
     instance = mocked_indent()
     mocker.spy(o.context, 'push_bracket')
     result = o()
@@ -110,7 +110,7 @@ def test_call_left_bracket(mocker, context_at_current, test_input, token_type):
 def test_call_right_bracket(mocker, context_at_current, test_input, left_bracket, token_type):
     o = Operators(context_at_current(test_input))
     o.context.push_bracket(left_bracket)
-    mocked_indent = mocker.patch('pylang.lexer3.states.Indent')
+    mocked_indent = mocker.patch('pylang.lexer.states.Indent')
     instance = mocked_indent()
     mocker.spy(o.context, 'pop_bracket')
     result = o()
@@ -129,7 +129,7 @@ def test_call_right_bracket(mocker, context_at_current, test_input, left_bracket
 def test_right_bracket_mismatched(mocker, context_at_current, test_input):
     o = Operators(context_at_current(test_input))
     o.context.push_bracket('\0')
-    mocked_indent = mocker.patch('pylang.lexer3.states.Indent')
+    mocked_indent = mocker.patch('pylang.lexer.states.Indent')
     instance = mocked_indent()
     mocker.spy(o.context, 'pop_bracket')
     result = o()
@@ -147,7 +147,7 @@ def test_right_bracket_mismatched(mocker, context_at_current, test_input):
 ])
 def test_digit_transitions_to_number_state(context_at_current, mocker, test_input):
     o = Operators(context_at_current(test_input))
-    mocked_number = mocker.patch('pylang.lexer3.states.Number')
+    mocked_number = mocker.patch('pylang.lexer.states.Number')
     called_instance = mocked_number()()
     result = o()
 
@@ -156,7 +156,7 @@ def test_digit_transitions_to_number_state(context_at_current, mocker, test_inpu
 
 def test_double_quote_transitions_to_string_state(context_at_current, mocker):
     o = Operators(context_at_current('"'))
-    mocked_string = mocker.patch('pylang.lexer3.states.String')
+    mocked_string = mocker.patch('pylang.lexer.states.String')
     called_instance = mocked_string()()
     result = o()
 
@@ -168,7 +168,7 @@ def test_double_quote_transitions_to_string_state(context_at_current, mocker):
 ])
 def test_non_reserved_character_or_digit_transitions_to_word_state(context_at_current, mocker, test_input):
     o = Operators(context_at_current('a'))
-    mocked_word = mocker.patch('pylang.lexer3.states.Word')
+    mocked_word = mocker.patch('pylang.lexer.states.Word')
     called_instance = mocked_word()()
     result = o()
     

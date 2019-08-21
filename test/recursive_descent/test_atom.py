@@ -2,7 +2,7 @@
 
 import pytest
 
-from pylang.lexer import Lexer
+from pylang.lexer.lexer import Lexer
 from pylang.recursive_descent import Parser, UnexpectedTokenError
 from pylang.parse_tree import Boolean, Float, Identifier, Integer
 
@@ -15,8 +15,8 @@ from pylang.parse_tree import Boolean, Float, Identifier, Integer
     ['(42)', Integer]
 ])
 def test_atom_types(test_input, expected):
-    l = Lexer(test_input)
-    l.emit()
+    l = Lexer.from_stream(test_input)
+    next(l)
     p = Parser(lexer=l)
 
     result = p.atom()
@@ -37,8 +37,8 @@ def test_atom_types(test_input, expected):
     'not'
 ])
 def test_keywords(test_input):
-    l = Lexer(test_input)
-    l.emit()
+    l = Lexer.from_stream(test_input)
+    next(l)
     p = Parser(lexer=l)
 
     with pytest.raises(UnexpectedTokenError):
