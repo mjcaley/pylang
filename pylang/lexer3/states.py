@@ -244,6 +244,9 @@ class Operators(State):
                 return self, Token(TokenType.Error, position, f'Opening bracket was {e.expected}')
             else:
                 return self, Token(TokenType.RBrace, position)
+        elif self.match('\n'):
+            self.context.advance()
+            return self, Token(TokenType.Newline, position)
 
         elif self.current_in(digits):
             state = Number(self.context)

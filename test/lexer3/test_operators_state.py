@@ -52,6 +52,19 @@ def test_call_token(context_at_current, test_input, token_type, mocker):
     assert o.context.advance.call_count == len(test_input)
 
 
+def test_call_newline(context_at_current, mocker):
+    o = Operators(context_at_current('\n'))
+    mocker.spy(o.context, 'advance')
+    result = o()
+
+    assert isinstance(result[0], Operators)
+    assert result[1].token_type == TokenType.Newline
+    assert result[1].position.index == 0
+    assert result[1].position.line == 1
+    assert result[1].position.column == 0
+    assert o.context.advance.call_count == 1
+
+
 def test_error_with_invalid_input(context_at_current):
     o = Operators(context_at_current('!'))
     result = o()
