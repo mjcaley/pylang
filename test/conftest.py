@@ -4,20 +4,6 @@ import pytest
 
 
 @pytest.fixture
-def parser():
-    from lark import Lark
-    from pylang.parser import grammar
-
-    def inner(start_rule=None):
-        if start_rule:
-            return Lark(grammar(), parser='lalr', start=start_rule)
-        else:
-            return Lark(grammar(), parser='lalr')
-
-    return inner
-
-
-@pytest.fixture
 def context():
     from pylang.lexer.context import Context
     from pylang.lexer.stream import Stream
@@ -56,5 +42,15 @@ def context_at_current(context_at_position):
         ctx = context_at_position(data, 2)
 
         return ctx
+
+    return inner
+
+
+@pytest.fixture
+def tokens_from_types(mocker):
+    from pylang.lexer.token import Token
+
+    def inner(*token_types):
+        return [Token(token_type, mocker.stub()) for token_type in token_types]
 
     return inner

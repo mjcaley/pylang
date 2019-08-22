@@ -58,6 +58,10 @@ def test_advance(lexer_digits):
     assert p.current == token
 
 
+def test_advance_stop_iteration():
+    p = Parser([])
+
+
 def test_consume(lexer_digits):
     p = Parser(lexer_digits)
 

@@ -2,49 +2,22 @@
 
 import pytest
 
-from pylang.lexer.lexer import Lexer
-from pylang.recursive_descent import Parser, UnexpectedTokenError
+from pylang.lexer.token import TokenType
 from pylang.parse_tree import Identifier
+from pylang.recursive_descent import Parser, UnexpectedTokenError
 
 
-@pytest.mark.parametrize('test_input', [
-    'abc',
-    'abc123',
-    '_abc',
-    '_abc_123_',
-    '\N{SIGN OF THE HORNS}'
-])
-def test_identifier(test_input):
-    l = Lexer.from_stream(test_input)
-    next(l)
-    p = Parser(lexer=l)
+def test_identifier(tokens_from_types):
+    p = Parser(lexer=tokens_from_types(TokenType.Identifier))
 
     result = p.identifier()
 
     assert isinstance(result, Identifier)
-    assert test_input == result.value.value
+    assert result.value.token_type == TokenType.Identifier
 
 
-@pytest.mark.parametrize('test_input', [
-    '123abc',
-    '123',
-    'true',
-    'false',
-    'func',
-    'struct',
-    'if',
-    'elif',
-    'else',
-    'while',
-    'for',
-    'and',
-    'or',
-    'not'
-])
-def test_not_identifier(test_input):
-    l = Lexer.from_stream(test_input)
-    next(l)
-    p = Parser(lexer=l)
+def test_not_identifier(tokens_from_types):
+    p = Parser(lexer=tokens_from_types(TokenType.Indent))
 
     with pytest.raises(UnexpectedTokenError):
         p.identifier()
