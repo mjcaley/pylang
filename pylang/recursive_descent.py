@@ -52,7 +52,7 @@ class Parser:
         try:
             self._next = next(self._lexer)
         except StopIteration:
-            pass
+            self._next = None
 
         return self.current
 
