@@ -2,7 +2,7 @@
 
 import pytest
 
-from pylang.lexer import Lexer
+from pylang.lexer.lexer import Lexer
 from pylang.recursive_descent import Parser, UnexpectedTokenError
 from pylang.parse_tree import Function, FunctionDecl
 
@@ -11,8 +11,8 @@ from pylang.parse_tree import Function, FunctionDecl
     'func functionName() = \n\ttrue\n',
 ])
 def test_function(test_input):
-    l = Lexer(test_input)
-    l.emit()
+    l = Lexer.from_stream(test_input)
+    next(l)
     p = Parser(lexer=l)
 
     result = p.function()
@@ -27,8 +27,8 @@ def test_function(test_input):
     'func functionName() = '
 ])
 def test_function_raises(test_input):
-    l = Lexer(test_input)
-    l.emit()
+    l = Lexer.from_stream(test_input)
+    next(l)
     p = Parser(lexer=l)
 
     with pytest.raises(UnexpectedTokenError):

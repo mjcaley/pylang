@@ -2,28 +2,24 @@
 
 import pytest
 
-from pylang.lexer import Lexer
+from pylang.lexer.token import TokenType
+from pylang.parse_tree import Boolean
 from pylang.recursive_descent import Parser, UnexpectedTokenError
 
 
-@pytest.mark.parametrize('test_input,expected', [
-    ['true', True],
-    ['false', False]
+@pytest.mark.parametrize('token_type', [
+    TokenType.True_, TokenType.False_
 ])
-def test_bool(test_input, expected):
-    l = Lexer(test_input)
-    l.emit()
-    p = Parser(lexer=l)
-
+def test_bool(token_type, tokens_from_types):
+    p = Parser(lexer=tokens_from_types(token_type))
     result = p.bool()
 
-    assert expected is result.value
+    assert isinstance(result, Boolean)
+    assert token_type == result.value.token_type
 
 
-def test_bool_exception():
-    l = Lexer('42')
-    l.emit()
-    p = Parser(lexer=l)
+def test_bool_exception(tokens_from_types):
+    p = Parser(lexer=tokens_from_types(TokenType.Indent))
 
     with pytest.raises(UnexpectedTokenError):
         p.bool()

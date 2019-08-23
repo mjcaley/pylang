@@ -2,7 +2,7 @@
 
 import pytest
 
-from pylang.lexer import Lexer
+from pylang.lexer.lexer import Lexer
 from pylang.recursive_descent import Parser, UnexpectedTokenError
 from pylang.parse_tree import Identifier
 
@@ -12,8 +12,8 @@ from pylang.parse_tree import Identifier
     ['abc, def, ghi', 3]
 ])
 def test_parameters(test_input, length):
-    l = Lexer(test_input)
-    l.emit()
+    l = Lexer.from_stream(test_input)
+    next(l)
     p = Parser(lexer=l)
 
     result = p.parameters()
@@ -24,8 +24,8 @@ def test_parameters(test_input, length):
 
 
 def test_parameters_raises():
-    l = Lexer('abc,')
-    l.emit()
+    l = Lexer.from_stream('abc,')
+    next(l)
     p = Parser(l)
 
     with pytest.raises(UnexpectedTokenError):

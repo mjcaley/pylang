@@ -2,7 +2,7 @@
 
 import pytest
 
-from pylang.lexer import Lexer
+from pylang.lexer.lexer import Lexer
 from pylang.recursive_descent import Parser, UnexpectedTokenError
 from pylang.parse_tree import FunctionDecl
 
@@ -16,14 +16,14 @@ from pylang.parse_tree import FunctionDecl
     ['func functionName(abc, def, ghi) : int', 'functionName', 3, 'int'],
 ])
 def test_parameters(test_input, name, num_params, return_type):
-    l = Lexer(test_input)
-    l.emit()
+    l = Lexer.from_stream(test_input)
+    next(l)
     p = Parser(lexer=l)
 
     result = p.function_decl()
 
     assert isinstance(result, FunctionDecl)
-    assert name == result.name.value
+    assert name == result.name.value.value
     assert num_params == len(result.parameters)
     if return_type:
-        assert return_type == result.return_type.value
+        assert result.return_type.value.value == return_type
