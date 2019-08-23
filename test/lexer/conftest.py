@@ -44,13 +44,3 @@ def context_at_current(context_at_position):
         return ctx
 
     return inner
-
-
-@pytest.fixture
-def tokens_from_types(mocker):
-    from pylang.lexer.token import Token
-
-    def inner(*token_types):
-        return [Token(token_type, mocker.stub()) for token_type in token_types]
-
-    return inner
