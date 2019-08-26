@@ -115,15 +115,26 @@ def test_eof_with_whitespace_transitions_to_dedent(context_at_current, mocker):
     assert result == called_instance
 
 
-@pytest.mark.xfail
-def test_blank_lines_dont_raise_recursion_error(context_at_current, mocker):
-    import sys
-
-    blank_lines = (' \n' * sys.getrecursionlimit()) + '123'
+def test_blank_lines_skipped(context_at_current, mocker):
+    blank_lines = '    \n' * 3 + '    123'
     i = Indent(context_at_current(blank_lines))
     i.context.push_indent(0)
+    i.context.push_indent(4)
     mocked_operators = mocker.patch('pylang.lexer.states.Operators')
     called_instance = mocked_operators()()
     result = i()
 
     assert result == called_instance
+#
+#
+# def test_blank_lines_dont_raise_recursion_error(context_at_current, mocker):
+#     import sys
+#
+#     blank_lines = (' \n' * sys.getrecursionlimit()) + '123'
+#     i = Indent(context_at_current(blank_lines))
+#     i.context.push_indent(0)
+#     mocked_operators = mocker.patch('pylang.lexer.states.Operators')
+#     called_instance = mocked_operators()()
+#     result = i()
+#
+#     assert result == called_instance

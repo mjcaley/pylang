@@ -78,8 +78,13 @@ class Indent(State):
 
     def __call__(self):
         position = self.context.current_position
-        whitespace = len(self.append_while(INDENT))
-        self.skip_whitespace()
+        while True:
+            whitespace = len(self.append_while(INDENT))
+            self.skip_whitespace()
+            if self.current_in(NEWLINE):
+                self.context.advance()
+            else:
+                break
 
         if self.eof:
             state = Dedent(self.context, target_indent=0)
@@ -93,11 +98,6 @@ class Indent(State):
         if position.column != 1:
             state = Operators(self.context)
             return state()
-
-        # Skip blank lines
-        if self.current_in(NEWLINE):
-            self.context.advance()
-            return self()   # TODO: This will cause a RecursionError if there's enough blank lines
 
         if whitespace > self.context.indent:
             self.context.push_indent(whitespace)
