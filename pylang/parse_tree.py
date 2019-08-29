@@ -1,9 +1,34 @@
 #!/usr/bin/env python3
 
 from dataclasses import dataclass
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Union
 
 from .lexer.token import Token
+
+
+@dataclass
+class Atom:
+    value: Token
+
+
+@dataclass
+class Identifier(Atom):
+    pass
+
+
+@dataclass
+class Boolean(Atom):
+    pass
+
+
+@dataclass
+class Integer(Atom):
+    pass
+
+
+@dataclass
+class Float(Atom):
+    pass
 
 
 class Expression:
@@ -12,9 +37,9 @@ class Expression:
 
 @dataclass
 class BinaryExpression(Expression):
-    left: Expression
+    left: Union[Expression, Atom]
     operator: Token
-    right: Expression
+    right: Union[Expression, Atom]
 
 
 @dataclass
@@ -41,31 +66,6 @@ class UnaryExpression(Expression):
 @dataclass
 class Statement:
     expression: Expression
-
-
-@dataclass
-class Atom:
-    value: Token
-
-
-@dataclass
-class Identifier(Atom):
-    pass
-
-
-@dataclass
-class Boolean(Atom):
-    pass
-
-
-@dataclass
-class Integer(Atom):
-    pass
-
-
-@dataclass
-class Float(Atom):
-    pass
 
 
 @dataclass

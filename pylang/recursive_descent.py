@@ -36,10 +36,10 @@ class Parser:
         return self._next
 
     def match_current(self, token_type):
-        return self.current.token_type == token_type
+        return self.current and self.current.token_type == token_type
 
     def match_next(self, token_type):
-        return self.next.token_type == token_type
+        return self.current and self.next.token_type == token_type
 
     def match(self, current_type, next_type=None):
         return all([

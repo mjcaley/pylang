@@ -1,37 +1,35 @@
 #!/usr/bin/env python3
 
-from functools import partial
-
 import pytest
 
 from pylang.lexer.token import TokenType
 from pylang.recursive_descent import Parser
-from pylang.parse_tree import Atom, ProductExpression
+from pylang.parse_tree import ProductExpression
 
 
 @pytest.mark.parametrize('operator', [
     TokenType.Multiply, TokenType.Divide
 ])
 def test_expression(tokens_from_types, operator, mocker):
-    p = Parser(lexer=tokens_from_types(TokenType.Integer, operator, TokenType.Integer))
-    mocked_expression = mocker.patch(
-        'pylang.recursive_descent.Parser.expression',
-        side_effect=(Atom(p.advance()) for _ in range(2))
-    )
+    tokens = tokens_from_types(TokenType.Integer, operator, TokenType.Integer)
+    p = Parser(lexer=tokens)
+    expression_spy = mocker.spy(p, 'expression')
+    unary_expr_spy = mocker.spy(p, 'unary_expr')
     result = p.product_expr()
 
     assert isinstance(result, ProductExpression)
-    assert mocked_expression.call_count == 2
-    assert result.left == TokenType.Minus
-    assert result.operator.token_type == TokenType.Minus
-    assert isinstance(result.right, Atom)
-    assert result.expression == mocked_expression.return_value
+    assert result.left.value is tokens[0]
+    assert result.operator is tokens[1]
+    assert result.right.value is tokens[2]
+    assert expression_spy.assert_called
+    assert unary_expr_spy.assert_called
 
 
 def test_returns_atom(tokens_from_types, mocker):
-    p = Parser(lexer=tokens_from_types(TokenType.True_))
-    mocked_atom = mocker.patch('pylang.recursive_descent.Parser.atom')
+    tokens = tokens_from_types(TokenType.True_)
+    p = Parser(lexer=tokens)
+    atom_spy = mocker.spy(p, 'atom')
     result = p.unary_expr()
 
-    assert mocked_atom.assert_called
-    assert result == mocked_atom.return_value
+    assert atom_spy.assert_called
+    assert result.value is tokens[0]
