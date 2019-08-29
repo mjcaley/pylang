@@ -8,11 +8,12 @@ from pylang.recursive_descent import Parser, UnexpectedTokenError
 
 
 def test_float(tokens_from_types):
-    p = Parser(lexer=tokens_from_types(TokenType.Float))
+    tokens = tokens_from_types(TokenType.Float)
+    p = Parser(lexer=tokens)
     result = p.float()
 
     assert isinstance(result, Float)
-    assert result.value.token_type == TokenType.Float
+    assert result.value is tokens[0]
 
 
 def test_float_exception(tokens_from_types):

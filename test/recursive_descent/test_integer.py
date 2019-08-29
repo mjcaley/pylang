@@ -2,20 +2,13 @@
 
 import pytest
 
-from pylang.lexer.lexer import Lexer
 from pylang.lexer.token import TokenType
 from pylang.recursive_descent import Parser
 
 
-@pytest.mark.parametrize('test_input', [
-    '4', '42'
-])
-def test_integer(test_input):
-    l = Lexer.from_stream(test_input)
-    next(l)
-    p = Parser(lexer=l)
-
+def test_integer(tokens_from_types):
+    tokens = tokens_from_types(TokenType.Integer)
+    p = Parser(lexer=tokens)
     result = p.integer()
 
-    assert result.value.token_type == TokenType.Integer
-    assert test_input == result.value.value
+    assert result.value is tokens[0]
