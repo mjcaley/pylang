@@ -11,11 +11,12 @@ from pylang.recursive_descent import Parser, UnexpectedTokenError
     TokenType.True_, TokenType.False_
 ])
 def test_bool(token_type, tokens_from_types):
-    p = Parser(lexer=tokens_from_types(token_type))
+    tokens = tokens_from_types(token_type)
+    p = Parser(lexer=tokens)
     result = p.bool()
 
     assert isinstance(result, Boolean)
-    assert token_type == result.value.token_type
+    assert result.value is tokens[0]
 
 
 def test_bool_exception(tokens_from_types):
