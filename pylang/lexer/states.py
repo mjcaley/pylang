@@ -323,6 +323,7 @@ class Number(State):
 
 class String(State):
     ESCAPE_CHARS = {
+        '0': '\0',
         'a': '\a',
         'b': '\b',
         'f': '\f',

@@ -46,6 +46,7 @@ def test_eof_in_middle_of_single_quoted_string(context_at_current, mocker):
 
 
 @pytest.mark.parametrize('test_input,expected', [
+    (r'\0', '\0'),
     (r'\a', '\a'),
     (r'\b', '\b'),
     (r'\f', '\f'),
