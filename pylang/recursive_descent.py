@@ -103,11 +103,8 @@ class Parser:
         else:
             raise UnexpectedTokenError(
                 expected=token_type,
-                received=self.current.token_type,
-                position=self.current.position,
-                message=f'Found {self.current.token_type}:{self.current.token_type.value} '
-                        f'and expected {token_type}{token_type.value} at '
-                        f'position: {self.current.position}'
+                received=self.current,
+                message=f'Expected {token_type} and found {self.current}'
             )
 
     def eof(self):
