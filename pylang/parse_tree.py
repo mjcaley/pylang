@@ -60,7 +60,7 @@ class ProductExpression(BinaryExpression):
 @dataclass
 class UnaryExpression(Expression):
     operator: Token
-    expression: Expression
+    expression: Union[Expression, Atom]
 
 
 @dataclass
