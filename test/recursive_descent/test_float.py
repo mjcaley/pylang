@@ -14,10 +14,3 @@ def test_float(tokens_from_types):
 
     assert isinstance(result, Float)
     assert result.value is tokens[0]
-
-
-def test_float_exception(tokens_from_types):
-    p = Parser(lexer=tokens_from_types(TokenType.Indent))
-
-    with pytest.raises(UnexpectedTokenError):
-        p.float()
