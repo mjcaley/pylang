@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 from .lexer.token import TokenType
-from .parse_tree import FunctionDecl, Function, Boolean, Integer, Float, Identifier, UnaryExpression, \
-    ProductExpression, SumExpression, AssignmentExpression
+from .parse_tree import FunctionDecl, Function, Boolean, Integer, Float, Identifier, String, \
+    UnaryExpression, ProductExpression, SumExpression, AssignmentExpression
 
 
 class ParserException(Exception):
@@ -275,3 +275,6 @@ class Parser:
 
     def identifier(self):
         return Identifier(value=self.consume_try(TokenType.Identifier))
+
+    def string(self):
+        return String(value=self.consume_try(TokenType.String))

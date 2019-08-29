@@ -31,6 +31,11 @@ class Float(Atom):
     pass
 
 
+@dataclass
+class String(Atom):
+    pass
+
+
 class Expression:
     pass
 
