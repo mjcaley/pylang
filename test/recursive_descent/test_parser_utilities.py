@@ -88,71 +88,6 @@ def test_consume_if_fail(lexer_digits):
     assert current_token != token
 
 
-def test_consume_if2_success_one(lexer_digits):
-    match = lexer_digits[0].token_type
-    p = Parser(lexer_digits)
-    result = p.consume_if2(match)
-
-    assert result[0].token_type == match
-
-
-def test_consume_if2_success_multiple(lexer_digits):
-    match = [token.token_type for token in lexer_digits[:3]]
-    p = Parser(lexer_digits)
-    result = p.consume_if2(*match)
-
-    assert result[0] == lexer_digits[0]
-    assert result[1] == lexer_digits[1]
-    assert result[2] == lexer_digits[2]
-    assert len(result) == 3
-
-
-def test_consume_if2_fail_first(lexer_digits):
-    p = Parser(lexer_digits)
-    result = p.consume_if2(TokenType.Error)
-
-    assert len(result) == 0
-
-
-def test_consume_if2_fail_partial(lexer_digits):
-    p = Parser(lexer_digits)
-    result = p.consume_if2(TokenType.Indent, TokenType.Integer, TokenType.Integer)
-
-    assert result[0] == lexer_digits[0]
-    assert result[1] == lexer_digits[1]
-    assert len(result) == 2
-
-
-def test_consume_try2_success_one(lexer_digits):
-    p = Parser(lexer_digits)
-    result = p.consume_try2(TokenType.Indent)
-
-    assert result[0] == lexer_digits[0]
-    assert len(result) == 1
-
-
-def test_consume_try2_success_multiple(lexer_digits):
-    p = Parser(lexer_digits)
-    result = p.consume_try2(TokenType.Indent, TokenType.Integer, TokenType.Dedent)
-
-    assert result[0] == lexer_digits[0]
-    assert result[1] == lexer_digits[1]
-    assert result[2] == lexer_digits[2]
-    assert len(result) == 3
-
-
-@pytest.mark.parametrize('test_input', [
-    [TokenType.Error],
-    [TokenType.Indent, TokenType.Error],
-    [TokenType.Indent, TokenType.Integer, TokenType.Dedent, TokenType.Indent],
-])
-def test_consume_try2_fails(test_input, lexer_digits):
-    p = Parser(lexer_digits)
-
-    with pytest.raises(UnexpectedTokenError):
-        p.consume_try2(*test_input)
-
-
 def test_consume_try_success(lexer_digits):
     p = Parser(lexer_digits)
     current_token = p.current
@@ -168,13 +103,9 @@ def test_consume_try_fail(lexer_digits):
         p.consume_try(TokenType.Dedent)
 
 
-def test_eof(lexer_digits):
-    p = Parser(lexer_digits)
+def test_eof(tokens_from_types):
+    p = Parser(tokens_from_types(TokenType.Dedent))
 
-    p.advance()
-    assert p.eof() is False     # Current is Digits
-    p.advance()
     assert p.eof() is False     # Current is Dedent
-
     p.advance()
     assert p.eof() is True

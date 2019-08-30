@@ -68,35 +68,6 @@ class Parser:
         else:
             return None
 
-    def consume_if2(self, *token_types):
-        tokens = []
-
-        for token_type in token_types:
-            if self.match_current(token_type):
-                tokens.append(self.consume())
-            else:
-                break
-
-        return tokens
-
-    def consume_try2(self, *token_types):
-        tokens = []
-
-        for token_type in token_types:
-            if self.match_current(token_type):
-                tokens.append(self.consume())
-            else:
-                raise UnexpectedTokenError(
-                    expected=token_type,
-                    received=self.current.token_type,
-                    position=self.current.position,
-                    message=f'Found {self.current.token_type}:{self.current.token_type.value} '
-                            f'and expected {token_type}{token_type.value} at '
-                            f'position: {self.current.position}'
-                )
-
-        return tokens
-
     def consume_try(self, token_type):
         if self.match(token_type):
             return self.consume()
@@ -108,7 +79,7 @@ class Parser:
             )
 
     def eof(self):
-        return self.match(TokenType.EOF)
+        return self.current is None and self.next is None
 
     def recover(self, skip_to_next_token=TokenType.Newline):
         while not self.match_next(skip_to_next_token) and \
