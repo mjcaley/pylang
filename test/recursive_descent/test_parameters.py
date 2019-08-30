@@ -1,32 +1,30 @@
 #!/usr/bin/env python3
 
-import pytest
-
-from pylang.lexer.lexer import Lexer
+from pylang.lexer.token import TokenType
 from pylang.recursive_descent import Parser, UnexpectedTokenError
-from pylang.parse_tree import Identifier
 
 
-@pytest.mark.parametrize('test_input,length', [
-    ['abc', 1],
-    ['abc, def, ghi', 3]
-])
-def test_parameters(test_input, length):
-    l = Lexer.from_stream(test_input)
-    next(l)
-    p = Parser(lexer=l)
-
+def test_one_parameter(tokens_from_types):
+    tokens = tokens_from_types(TokenType.Identifier)
+    p = Parser(lexer=tokens)
     result = p.parameters()
 
-    assert length == len(result)
-    for node in result:
-        assert isinstance(node, Identifier)
+    assert len(result) == 1
+    assert result[0].value is tokens[0]
 
 
-def test_parameters_raises():
-    l = Lexer.from_stream('abc,')
-    next(l)
-    p = Parser(l)
+def test_multiple_parameter(tokens_from_types):
+    tokens = tokens_from_types(
+        TokenType.Identifier,
+        TokenType.Comma,
+        TokenType.Identifier,
+        TokenType.Comma,
+        TokenType.Identifier
+    )
+    p = Parser(lexer=tokens)
+    result = p.parameters()
 
-    with pytest.raises(UnexpectedTokenError):
-        p.parameters()
+    assert len(result) == 3
+    assert result[0].value is tokens[0]
+    assert result[1].value is tokens[2]
+    assert result[2].value is tokens[4]
