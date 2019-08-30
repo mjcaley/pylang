@@ -12,6 +12,16 @@ from pylang.recursive_descent import Parser, UnexpectedTokenError
         [TokenType.Function, TokenType.Identifier, TokenType.LParen, TokenType.RParen,
          TokenType.Assignment, TokenType.Newline, TokenType.Indent, TokenType.Dedent], 'function'
     ],
+    [[TokenType.If, TokenType.True_, TokenType.Colon, TokenType.Indent, TokenType.Dedent], 'if_statement'],
+    [
+        [TokenType.If, TokenType.True_, TokenType.Colon, TokenType.Indent, TokenType.Dedent,
+         TokenType.Else, TokenType.Colon, TokenType.Newline, TokenType.Indent, TokenType.Dedent], 'if_statement'
+    ],
+    [
+        [TokenType.If, TokenType.True_, TokenType.Colon, TokenType.Indent, TokenType.Dedent,
+         TokenType.ElseIf, TokenType.False_, TokenType.Colon,
+         TokenType.Newline, TokenType.Indent, TokenType.Dedent], 'if_statement'
+    ],
 ])
 def test_statement(tokens_from_types, token_stream, func_spy, mocker):
     tokens = tokens_from_types(*token_stream)

@@ -84,3 +84,10 @@ class FunctionDecl:
 class Function:
     definition: FunctionDecl
     block: Sequence[Statement]
+
+
+@dataclass
+class Branch:
+    condition: Expression
+    then_branch: Sequence[Statement]
+    else_branch: Optional[Sequence[Statement], 'Branch']

@@ -2,7 +2,8 @@
 
 from .lexer.token import TokenType
 from .parse_tree import FunctionDecl, Function, Boolean, Integer, Float, Identifier, String, \
-    UnaryExpression, ProductExpression, SumExpression, AssignmentExpression
+    UnaryExpression, ProductExpression, SumExpression, AssignmentExpression, \
+    Branch
 
 
 class ParserException(Exception):
@@ -141,9 +142,33 @@ class Parser:
 
         return statements
 
+    def if_statement(self):
+        if self.match(TokenType.If) or self.match(TokenType.ElseIf):
+            self.consume()
+        condition = self.expression()
+
+        self.consume_if(TokenType.Colon)
+        self.consume_if(TokenType.Newline)
+
+        then_block = self.block()
+
+        if self.match(TokenType.ElseIf):
+            else_block = self.if_statement()
+            return Branch(condition, then_block, else_block)
+        elif self.consume_if(TokenType.Else):
+            self.consume_try(TokenType.Colon)
+            self.consume_try(TokenType.Newline)
+            else_block = self.block()
+
+            return Branch(condition, then_block, else_block)
+        else:
+            return Branch(condition, then_block, [])
+
     def statement(self):
         if self.match(TokenType.Function):
             return self.function()
+        elif self.match(TokenType.If):
+            return self.if_statement()
         else:
             expr = self.expression()
             self.consume_try(TokenType.Newline)
