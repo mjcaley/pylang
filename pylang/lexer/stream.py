@@ -31,7 +31,7 @@ class Stream:
             position = Position(
                 index=self._position.index + 1,
                 line=self._position.line,
-                column=self._position.column)
+                column=self._position.column + 1)
             self._position = Position(
                 index=position.index,
                 line=position.line + 1,

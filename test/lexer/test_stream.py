@@ -40,6 +40,17 @@ def test_eof(test_input):
     assert result.character == ''
 
 
+def test_newline_last_column():
+    s = Stream('42\n')
+    next(s)
+    next(s)
+    result = next(s)
+
+    assert result.position.index == 2
+    assert result.position.line == 1
+    assert result.position.column == 3
+
+
 @pytest.mark.parametrize('test_input', [
     '\na',
     '\r\na',
