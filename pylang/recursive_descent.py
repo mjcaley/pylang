@@ -142,10 +142,13 @@ class Parser:
         return statements
 
     def statement(self):
-        expr = self.expression()
-        self.consume_try(TokenType.Newline)
+        if self.match(TokenType.Function):
+            return self.function()
+        else:
+            expr = self.expression()
+            self.consume_try(TokenType.Newline)
 
-        return expr
+            return expr
 
     def expression(self):
         return self.assignment_expr()
