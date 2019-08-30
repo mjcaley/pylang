@@ -50,6 +50,18 @@ def test_skip_whitespace_after_indent(context_at_current, mocker):
     assert i.context.advance.call_count == len(indent + whitespace)
 
 
+def test_skip_whitespace_not_at_beginning(context_at_position, mocker):
+    i = Indent(context_at_position('    \n', 3))
+    i.context.push_indent(0)
+    skip_whitespace_spy = mocker.spy(i, 'skip_whitespace')
+    mocked_operators = mocker.patch('pylang.lexer.states.Operators')
+    called_instance = mocked_operators()()
+    result = i()
+
+    assert skip_whitespace_spy.called
+    assert result == called_instance
+
+
 def test_transition_to_operators_at_newline(context_at_position, mocker):
     i = Indent(context_at_position('42\n', 4))
     i.context.push_indent(0)

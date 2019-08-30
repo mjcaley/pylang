@@ -88,6 +88,7 @@ class Indent(State):
 
         # Skip if not at beginning of line
         if position.column != 1:
+            self.skip_whitespace()
             state = Operators(self.context)
             return state()
 
