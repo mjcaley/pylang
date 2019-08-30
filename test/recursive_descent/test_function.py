@@ -1,35 +1,27 @@
 #!/usr/bin/env python3
 
-import pytest
-
-from pylang.lexer.lexer import Lexer
-from pylang.recursive_descent import Parser, UnexpectedTokenError
+from pylang.lexer.token import TokenType
+from pylang.recursive_descent import Parser
 from pylang.parse_tree import Function, FunctionDecl
 
 
-@pytest.mark.parametrize('test_input', [
-    'func functionName() = \n\ttrue\n',
-])
-def test_function(test_input):
-    l = Lexer.from_stream(test_input)
-    next(l)
-    p = Parser(lexer=l)
+def test_function(tokens_from_types, mocker):
+    tokens = tokens_from_types(
+        TokenType.Function,
+        TokenType.Identifier,
+        TokenType.LParen,
+        TokenType.RParen,
+        TokenType.Assignment,
+        TokenType.Newline,
+        TokenType.Indent,
+        TokenType.Dedent
+    )
+    p = Parser(lexer=tokens)
+    block_spy = mocker.spy(p, 'block')
 
     result = p.function()
 
     assert isinstance(result, Function)
     assert isinstance(result.definition, FunctionDecl)
     assert isinstance(result.block, list)
-
-
-@pytest.mark.parametrize('test_input', [
-    'func functionName()',
-    'func functionName() = '
-])
-def test_function_raises(test_input):
-    l = Lexer.from_stream(test_input)
-    next(l)
-    p = Parser(lexer=l)
-
-    with pytest.raises(UnexpectedTokenError):
-        p.function()
+    assert block_spy.assert_called
