@@ -93,18 +93,7 @@ class Parser:
             print('Irrecoverable error occurred when parsing')
 
     def start(self):
-        functions = []
-
-        self.consume_try(TokenType.Indent)
-
-        while not self.match(TokenType.Dedent):
-            try:
-                functions.append(self.function())
-            except UnexpectedTokenError:
-                self.recover(TokenType.Function)
-        self.consume_try(TokenType.Dedent)
-
-        return functions
+        return self.block()
 
     def parameters(self):
         params = [self.identifier()]
