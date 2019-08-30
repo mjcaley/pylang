@@ -50,6 +50,18 @@ def test_skip_whitespace_after_indent(context_at_current, mocker):
     assert i.context.advance.call_count == len(indent + whitespace)
 
 
+def test_transition_to_operators_at_newline(context_at_position, mocker):
+    i = Indent(context_at_position('42\n', 4))
+    i.context.push_indent(0)
+    mocked_operators = mocker.patch('pylang.lexer.states.Operators')
+    called_instance = mocked_operators()()
+    result = i()
+
+    assert result == called_instance
+    assert i.context.current_position.line == 1
+    assert i.context.current_position.column == 3
+
+
 def test_skip_empty_line(context_at_current, mocker):
     i = Indent(context_at_current('    \n+'))
     i.context.push_indent(0)
@@ -95,11 +107,11 @@ def test_dedent(context_at_position, mocker):
     assert result == called_instance
 
 
-def test_eof_transitions_to_dedent(context_at_current, mocker):
-    i = Indent(context_at_current(''))
+def test_eof_transitions_to_is_eof(context_at_current, mocker):
+    i = Indent(context_at_current(' '))
     i.context.push_indent(0)
-    mocked_dedent = mocker.patch('pylang.lexer.states.Dedent')
-    called_instance = mocked_dedent()()
+    mocked_is_eof = mocker.patch('pylang.lexer.states.IsEOF')
+    called_instance = mocked_is_eof()()
     result = i()
 
     assert result == called_instance
@@ -125,16 +137,3 @@ def test_blank_lines_skipped(context_at_current, mocker):
     result = i()
 
     assert result == called_instance
-#
-#
-# def test_blank_lines_dont_raise_recursion_error(context_at_current, mocker):
-#     import sys
-#
-#     blank_lines = (' \n' * sys.getrecursionlimit()) + '123'
-#     i = Indent(context_at_current(blank_lines))
-#     i.context.push_indent(0)
-#     mocked_operators = mocker.patch('pylang.lexer.states.Operators')
-#     called_instance = mocked_operators()()
-#     result = i()
-#
-#     assert result == called_instance

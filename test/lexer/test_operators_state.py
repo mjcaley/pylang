@@ -8,8 +8,8 @@ from pylang.lexer.token import TokenType
 
 def test_eof_transitions_to_indent(context, mocker):
     o = Operators(context(''))
-    mocked_indent = mocker.patch('pylang.lexer.states.Indent')
-    called_instance = mocked_indent()()
+    mocked_is_eof = mocker.patch('pylang.lexer.states.IsEOF')
+    called_instance = mocked_is_eof()()
     result = o()
 
     assert result == called_instance
@@ -41,8 +41,8 @@ def test_eof_transitions_to_indent(context, mocker):
 ])
 def test_call_token(context_at_current, test_input, token_type, mocker):
     o = Operators(context_at_current(test_input))
-    mocked_indent = mocker.patch('pylang.lexer.states.Indent')
-    instance = mocked_indent()
+    mocked_is_eof = mocker.patch('pylang.lexer.states.IsEOF')
+    instance = mocked_is_eof()
     mocker.spy(o.context, 'advance')
     result = o()
 
@@ -56,8 +56,8 @@ def test_call_token(context_at_current, test_input, token_type, mocker):
 
 def test_call_newline(context_at_current, mocker):
     o = Operators(context_at_current('\n'))
-    mocked_indent = mocker.patch('pylang.lexer.states.Indent')
-    instance = mocked_indent()
+    mocked_is_eof = mocker.patch('pylang.lexer.states.IsEOF')
+    instance = mocked_is_eof()
     mocker.spy(o.context, 'advance')
     result = o()
 
@@ -65,14 +65,14 @@ def test_call_newline(context_at_current, mocker):
     assert result[1].token_type == TokenType.Newline
     assert result[1].position.index == 0
     assert result[1].position.line == 1
-    assert result[1].position.column == 0
+    assert result[1].position.column == 1
     assert o.context.advance.call_count == 1
 
 
 def test_error_with_invalid_input(context_at_current, mocker):
     o = Operators(context_at_current('!'))
-    mocked_indent = mocker.patch('pylang.lexer.states.Indent')
-    instance = mocked_indent()
+    mocked_is_eof = mocker.patch('pylang.lexer.states.IsEOF')
+    instance = mocked_is_eof()
     result = o()
 
     assert result[0] == instance
@@ -89,8 +89,8 @@ def test_error_with_invalid_input(context_at_current, mocker):
 ])
 def test_call_left_bracket(mocker, context_at_current, test_input, token_type):
     o = Operators(context_at_current(test_input))
-    mocked_indent = mocker.patch('pylang.lexer.states.Indent')
-    instance = mocked_indent()
+    mocked_is_eof = mocker.patch('pylang.lexer.states.IsEOF')
+    instance = mocked_is_eof()
     mocker.spy(o.context, 'push_bracket')
     result = o()
 
@@ -110,8 +110,8 @@ def test_call_left_bracket(mocker, context_at_current, test_input, token_type):
 def test_call_right_bracket(mocker, context_at_current, test_input, left_bracket, token_type):
     o = Operators(context_at_current(test_input))
     o.context.push_bracket(left_bracket)
-    mocked_indent = mocker.patch('pylang.lexer.states.Indent')
-    instance = mocked_indent()
+    mocked_is_eof = mocker.patch('pylang.lexer.states.IsEOF')
+    instance = mocked_is_eof()
     mocker.spy(o.context, 'pop_bracket')
     result = o()
 
@@ -129,8 +129,8 @@ def test_call_right_bracket(mocker, context_at_current, test_input, left_bracket
 def test_right_bracket_mismatched(mocker, context_at_current, test_input):
     o = Operators(context_at_current(test_input))
     o.context.push_bracket('\0')
-    mocked_indent = mocker.patch('pylang.lexer.states.Indent')
-    instance = mocked_indent()
+    mocked_is_eof = mocker.patch('pylang.lexer.states.IsEOF')
+    instance = mocked_is_eof()
     mocker.spy(o.context, 'pop_bracket')
     result = o()
 

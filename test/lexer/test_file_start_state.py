@@ -6,8 +6,8 @@ from pylang.lexer.token import TokenType
 
 def test_call_returns_indent_state(context, mocker):
     s = FileStart(context(''))
-    mocked_indent = mocker.patch('pylang.lexer.states.Indent')
-    instance = mocked_indent()
+    mocked_is_eof = mocker.patch('pylang.lexer.states.IsEOF')
+    instance = mocked_is_eof()
     mocker.spy(s.context, 'advance')
     mocker.spy(s.context, 'push_indent')
     result = s()

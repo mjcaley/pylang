@@ -69,15 +69,28 @@ class FileStart(State):
         self.context.advance()
         self.context.push_indent(0)
 
-        return Indent(self.context), Token(TokenType.Indent, None)
+        return IsEOF(self.context), Token(TokenType.Indent, None)
+
+
+class IsEOF(State):
+    def __call__(self):
+        if self.eof:
+            state = Dedent(self.context, target_indent=0)
+            return state()
+        else:
+            state = Indent(self.context)
+            return state()
 
 
 class Indent(State):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     def __call__(self):
         position = self.context.current_position
+
+        # Skip if not at beginning of line
+        if position.column != 1:
+            state = Operators(self.context)
+            return state()
+
         while True:
             whitespace = len(self.append_while(INDENT))
             self.skip_whitespace()
@@ -87,15 +100,10 @@ class Indent(State):
                 break
 
         if self.eof:
-            state = Dedent(self.context, target_indent=0)
+            state = IsEOF(self.context)
             return state()
         
         if self.context.bracket:
-            state = Operators(self.context)
-            return state()
-
-        # Skip if not at beginning of line
-        if position.column != 1:
             state = Operators(self.context)
             return state()
 
@@ -121,7 +129,7 @@ class Dedent(State):
                 state = FileEnd(self.context)
                 return state()
             else:
-                state = Indent(self.context)
+                state = IsEOF(self.context)
                 return state()
         elif self.target_indent < self.context.indent:
             self.context.pop_indent()
@@ -134,125 +142,125 @@ class Operators(State):
         character = self.context.current
 
         if self.eof:
-            state = Indent(self.context)
+            state = IsEOF(self.context)
             return state()
 
-        indent = Indent(self.context)
+        is_eof = IsEOF(self.context)
         if self.match('+'):
             self.context.advance()
             if self.match('='):
                 self.context.advance()
-                return indent, Token(TokenType.PlusAssign, position)
-            return indent, Token(TokenType.Plus, position)
+                return is_eof, Token(TokenType.PlusAssign, position)
+            return is_eof, Token(TokenType.Plus, position)
         elif self.match('-'):
             self.context.advance()
             if self.match('='):
                 self.context.advance()
-                return indent, Token(TokenType.MinusAssign, position)
-            return indent, Token(TokenType.Minus, position)
+                return is_eof, Token(TokenType.MinusAssign, position)
+            return is_eof, Token(TokenType.Minus, position)
         elif self.match('*'):
             self.context.advance()
             if self.match('='):
                 self.context.advance()
-                return indent, Token(TokenType.MultiplyAssign, position)
+                return is_eof, Token(TokenType.MultiplyAssign, position)
             elif self.match('*'):
                 self.context.advance()
                 if self.match('='):
                     self.context.advance()
-                    return indent, Token(TokenType.ExponentAssign, position)
+                    return is_eof, Token(TokenType.ExponentAssign, position)
                 else:
-                    return indent, Token(TokenType.Exponent, position)
+                    return is_eof, Token(TokenType.Exponent, position)
             else:
-                return indent, Token(TokenType.Multiply, position)
+                return is_eof, Token(TokenType.Multiply, position)
         elif self.match('/'):
             self.context.advance()
             if self.match('='):
                 self.context.advance()
-                return indent, Token(TokenType.DivideAssign, position)
-            return indent, Token(TokenType.Divide, position)
+                return is_eof, Token(TokenType.DivideAssign, position)
+            return is_eof, Token(TokenType.Divide, position)
         elif self.match('%'):
             self.context.advance()
             if self.match('='):
                 self.context.advance()
-                return indent, Token(TokenType.ModuloAssign, position)
-            return indent, Token(TokenType.Modulo, position)
+                return is_eof, Token(TokenType.ModuloAssign, position)
+            return is_eof, Token(TokenType.Modulo, position)
         elif self.match('='):
             self.context.advance()
             if self.match('='):
                 self.context.advance()
-                return indent, Token(TokenType.Equal, position)
+                return is_eof, Token(TokenType.Equal, position)
             else:
-                return indent, Token(TokenType.Assignment, position)
+                return is_eof, Token(TokenType.Assignment, position)
         elif self.match('!'):
             self.context.advance()
             if self.match('='):
                 self.context.advance()
-                return indent, Token(TokenType.NotEqual, position)
+                return is_eof, Token(TokenType.NotEqual, position)
             else:
-                return indent, Token(TokenType.Error, position)
+                return is_eof, Token(TokenType.Error, position)
         elif self.match('<'):
             self.context.advance()
             if self.match('='):
                 self.context.advance()
-                return indent, Token(TokenType.LessThanOrEqual, position)
+                return is_eof, Token(TokenType.LessThanOrEqual, position)
             else:
-                return indent, Token(TokenType.LessThan, position)
+                return is_eof, Token(TokenType.LessThan, position)
         elif self.match('>'):
             self.context.advance()
             if self.match('='):
                 self.context.advance()
-                return indent, Token(TokenType.GreaterThanOrEqual, position)
+                return is_eof, Token(TokenType.GreaterThanOrEqual, position)
             else:
-                return indent, Token(TokenType.GreaterThan, position)
+                return is_eof, Token(TokenType.GreaterThan, position)
         elif self.match('.'):
             self.context.advance()
-            return indent, Token(TokenType.Dot, position)
+            return is_eof, Token(TokenType.Dot, position)
         elif self.match(':'):
             self.context.advance()
-            return indent, Token(TokenType.Colon, position)
+            return is_eof, Token(TokenType.Colon, position)
         elif self.match(','):
             self.context.advance()
-            return indent, Token(TokenType.Comma, position)
+            return is_eof, Token(TokenType.Comma, position)
 
         elif self.match('('):
             self.context.advance()
             self.context.push_bracket(character)
-            return indent, Token(TokenType.LParen, position)
+            return is_eof, Token(TokenType.LParen, position)
         elif self.match('['):
             self.context.advance()
             self.context.push_bracket(character)
-            return indent, Token(TokenType.LSquare, position)
+            return is_eof, Token(TokenType.LSquare, position)
         elif self.match('{'):
             self.context.advance()
             self.context.push_bracket(character)
-            return indent, Token(TokenType.LBrace, position)
+            return is_eof, Token(TokenType.LBrace, position)
         elif self.match(')'):
             self.context.advance()
             try:
                 self.context.pop_bracket('(')
             except MismatchedBracketException as e:
-                return indent, Token(TokenType.Error, position, f'Opening bracket was {e.expected}')
+                return is_eof, Token(TokenType.Error, position, f'Opening bracket was {e.expected}')
             else:
-                return indent, Token(TokenType.RParen, position)
+                return is_eof, Token(TokenType.RParen, position)
         elif self.match(']'):
             self.context.advance()
             try:
                 self.context.pop_bracket('[')
             except MismatchedBracketException as e:
-                return indent, Token(TokenType.Error, position, f'Opening bracket was {e.expected}')
+                return is_eof, Token(TokenType.Error, position, f'Opening bracket was {e.expected}')
             else:
-                return indent, Token(TokenType.RSquare, position)
+                return is_eof, Token(TokenType.RSquare, position)
         elif self.match('}'):
             self.context.advance()
             try:
                 self.context.pop_bracket('{')
             except MismatchedBracketException as e:
-                return indent, Token(TokenType.Error, position, f'Opening bracket was {e.expected}')
+                return is_eof, Token(TokenType.Error, position, f'Opening bracket was {e.expected}')
             else:
-                return indent, Token(TokenType.RBrace, position)
+                return is_eof, Token(TokenType.RBrace, position)
         elif self.match('\n'):
             self.context.advance()
-            return indent, Token(TokenType.Newline, position)
+            return is_eof, Token(TokenType.Newline, position)
 
         elif self.current_in(digits):
             state = Number(self.context)
@@ -304,21 +312,21 @@ class Number(State):
         try:
             first_number = self.read_number()
         except InvalidNumberInputException:
-            return Indent(self.context), Token(TokenType.Error, position)
+            return IsEOF(self.context), Token(TokenType.Error, position)
 
         if self.match('.') and self.next_in(digits):
             self.context.advance()
             try:
                 second_number = self.read_number()
             except InvalidNumberInputException:
-                return Indent(self.context), Token(TokenType.Error, position)
+                return IsEOF(self.context), Token(TokenType.Error, position)
 
             value = first_number + '.' + second_number
-            return Indent(self.context), Token(TokenType.Float, position, value)
+            return IsEOF(self.context), Token(TokenType.Float, position, value)
         elif self.match('.') and not self.next_in(digits):
-            return Indent(self.context), Token(TokenType.Integer, position, first_number)
+            return IsEOF(self.context), Token(TokenType.Integer, position, first_number)
         else:
-            return Indent(self.context), Token(TokenType.Integer, position, first_number)
+            return IsEOF(self.context), Token(TokenType.Integer, position, first_number)
 
 
 class String(State):
@@ -344,9 +352,9 @@ class String(State):
         while not self.eof:
             if self.match('"'):
                 self.context.advance()
-                return Indent(self.context), Token(TokenType.String, position, value)
+                return IsEOF(self.context), Token(TokenType.String, position, value)
             elif self.current_in(NEWLINE):
-                return Indent(self.context), Token(TokenType.Error, self.context.current_position)
+                return IsEOF(self.context), Token(TokenType.Error, self.context.current_position)
             elif self.match('\\'):
                 # Expect a escape character
                 self.context.advance()
@@ -355,7 +363,7 @@ class String(State):
                     self.context.advance()
                 else:
                     return (
-                        Indent(self.context),
+                        IsEOF(self.context),
                         Token(TokenType.Error, self.context.current_position, 'Unknown escape character')
                     )
             else:
@@ -363,43 +371,43 @@ class String(State):
                 self.context.advance()
 
         if self.eof:
-            return Indent(self.context), Token(TokenType.Error, position)
+            return IsEOF(self.context), Token(TokenType.Error, position)
 
 
 class Word(State):
     def __call__(self):
         position = self.context.current_position
         value = self.append_while_not(RESERVED_CHARACTERS)
-        indent = Indent(self.context)
+        is_eof = IsEOF(self.context)
 
         if value == 'func':
-            return indent, Token(TokenType.Function, position, value)
+            return is_eof, Token(TokenType.Function, position, value)
         elif value == 'struct':
-            return indent, Token(TokenType.Struct, position, value)
+            return is_eof, Token(TokenType.Struct, position, value)
         elif value == 'if':
-            return indent, Token(TokenType.If, position, value)
+            return is_eof, Token(TokenType.If, position, value)
         elif value == 'elif':
-            return indent, Token(TokenType.ElseIf, position, value)
+            return is_eof, Token(TokenType.ElseIf, position, value)
         elif value == 'else':
-            return indent, Token(TokenType.Else, position, value)
+            return is_eof, Token(TokenType.Else, position, value)
         elif value == 'while':
-            return indent, Token(TokenType.While, position, value)
+            return is_eof, Token(TokenType.While, position, value)
         elif value == 'for':
-            return indent, Token(TokenType.ForEach, position, value)
+            return is_eof, Token(TokenType.ForEach, position, value)
         elif value == 'and':
-            return indent, Token(TokenType.And, position, value)
+            return is_eof, Token(TokenType.And, position, value)
         elif value == 'not':
-            return indent, Token(TokenType.Not, position, value)
+            return is_eof, Token(TokenType.Not, position, value)
         elif value == 'or':
-            return indent, Token(TokenType.Or, position, value)
+            return is_eof, Token(TokenType.Or, position, value)
         elif value == 'true':
-            return indent, Token(TokenType.True_, position, value)
+            return is_eof, Token(TokenType.True_, position, value)
         elif value == 'false':
-            return indent, Token(TokenType.False_, position, value)
+            return is_eof, Token(TokenType.False_, position, value)
         elif value == 'return':
-            return indent, Token(TokenType.Return, position, value)
+            return is_eof, Token(TokenType.Return, position, value)
         else:
-            return indent, Token(TokenType.Identifier, position, value)
+            return is_eof, Token(TokenType.Identifier, position, value)
 
 
 class FileEnd(State):
