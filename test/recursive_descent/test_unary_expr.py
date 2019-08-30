@@ -15,7 +15,7 @@ def test_negative_expression(tokens_from_types, mocker):
     assert isinstance(result, UnaryExpression)
     assert result.operator is tokens[0]
     assert result.expression.value is tokens[1]
-    assert expression_spy.assert_called
+    assert expression_spy.called
 
 
 def test_returns_atom(tokens_from_types, mocker):
@@ -25,4 +25,4 @@ def test_returns_atom(tokens_from_types, mocker):
     result = p.unary_expr()
 
     assert result.value is tokens[0]
-    assert atom_spy.assert_called
+    assert atom_spy.called

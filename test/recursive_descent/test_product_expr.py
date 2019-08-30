@@ -21,8 +21,8 @@ def test_expression(tokens_from_types, operator, mocker):
     assert result.left.value is tokens[0]
     assert result.operator is tokens[1]
     assert result.right.value is tokens[2]
-    assert expression_spy.assert_called
-    assert unary_expr_spy.assert_called
+    assert expression_spy.called
+    assert unary_expr_spy.called
 
 
 def test_returns_atom(tokens_from_types, mocker):
@@ -31,5 +31,5 @@ def test_returns_atom(tokens_from_types, mocker):
     atom_spy = mocker.spy(p, 'atom')
     result = p.unary_expr()
 
-    assert atom_spy.assert_called
+    assert atom_spy.called
     assert result.value is tokens[0]

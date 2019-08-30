@@ -24,4 +24,4 @@ def test_function(tokens_from_types, mocker):
     assert isinstance(result, Function)
     assert isinstance(result.definition, FunctionDecl)
     assert isinstance(result.block, list)
-    assert block_spy.assert_called
+    assert block_spy.called

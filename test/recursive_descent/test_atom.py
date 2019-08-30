@@ -28,7 +28,7 @@ def test_expression(mocker, tokens_from_types):
     result = p.atom()
 
     assert result.value is tokens[1]
-    assert expression_spy.assert_called
+    assert expression_spy.called
 
 
 def test_expression_raises_on_open_bracket(tokens_from_types):

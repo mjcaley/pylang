@@ -10,4 +10,4 @@ def test_start(tokens_from_types, mocker):
     result = p.start()
 
     assert result == []
-    assert block_spy.assert_called
+    assert block_spy.called

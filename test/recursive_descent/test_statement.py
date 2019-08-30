@@ -20,7 +20,7 @@ def test_statement(tokens_from_types, token_stream, func_spy, mocker):
     result = p.statement()
 
     assert result is not None
-    assert spy.assert_called
+    assert spy.called
 
 
 def test_statement_without_newline(tokens_from_types):
