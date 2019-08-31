@@ -199,7 +199,7 @@ class Parser:
 
     def product_expr(self):
         left = self.unary_expr()
-        if self.match(TokenType.Multiply) or self.match(TokenType.Divide):
+        if self.match(TokenType.Multiply) or self.match(TokenType.Divide) or self.match(TokenType.Modulo):
             operator = self._current
             self.advance()
             right = self.expression()
