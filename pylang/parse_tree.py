@@ -88,6 +88,6 @@ class Function:
 
 @dataclass
 class Branch:
-    condition: Expression
+    condition: Union[Expression, Atom]
     then_branch: Sequence[Statement]
     else_branch: Union[Sequence[Statement], 'Branch']
