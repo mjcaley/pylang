@@ -90,4 +90,4 @@ class Function:
 class Branch:
     condition: Expression
     then_branch: Sequence[Statement]
-    else_branch: Optional[Sequence[Statement], 'Branch']
+    else_branch: Optional[Union[Sequence[Statement], 'Branch']]
