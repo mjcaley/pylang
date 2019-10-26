@@ -17,6 +17,17 @@ class UnexpectedTokenError(ParserException):
         self.position = position
         self.message = message
 
+    def __repr__(self):
+        return f'{self.__class__.__name__}(' \
+            f'expected={repr(self.expected)}, ' \
+            f'received={repr(self.received)}, ' \
+            f'position={repr(self.position)}, ' \
+            f'message={repr(self.message)}' \
+            ')'
+
+    def __str__(self):
+        return repr(self)
+
 
 class Parser:
     def __init__(self, lexer):
@@ -199,7 +210,7 @@ class Parser:
 
     def product_expr(self):
         left = self.unary_expr()
-        if self.match(TokenType.Multiply) or self.match(TokenType.Divide):
+        if self.match(TokenType.Multiply) or self.match(TokenType.Divide) or self.match(TokenType.Modulo):
             operator = self._current
             self.advance()
             right = self.expression()

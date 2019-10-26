@@ -8,7 +8,7 @@ from pylang.parse_tree import ProductExpression
 
 
 @pytest.mark.parametrize('operator', [
-    TokenType.Multiply, TokenType.Divide
+    TokenType.Multiply, TokenType.Divide, TokenType.Modulo
 ])
 def test_expression(tokens_from_types, operator, mocker):
     tokens = tokens_from_types(TokenType.Integer, operator, TokenType.Integer)
