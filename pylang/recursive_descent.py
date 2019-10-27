@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .lexer.token import TokenType
-from .parse_tree import FunctionDecl, Function, Boolean, Integer, Float, Identifier, String, \
+from .parse_tree import Block, FunctionDecl, Function, Boolean, Integer, Float, Identifier, String, \
     UnaryExpression, ProductExpression, SumExpression, AssignmentExpression, \
     Branch
 
@@ -151,7 +151,7 @@ class Parser:
             statements.append(self.statement())
         self.consume_try(TokenType.Dedent)
 
-        return statements
+        return Block(statements)
 
     def if_statement(self):
         if self.match(TokenType.If) or self.match(TokenType.ElseIf):

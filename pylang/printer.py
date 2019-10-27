@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-from functools import singledispatch
+from functools import singledispatchmethod
+from typing import Collection, List
 
 from .parse_tree import *
 
@@ -26,18 +27,56 @@ from .parse_tree import *
 
 
 class IndentLevel:
-    def __init__(self, width=4):
+    def __init__(
+            self,
+            template=' {}{}',
+            trunk='\u2502',
+            child='\u2514',
+            children='\u251c',
+            horizontal_line='\u2500',
+            width=3
+    ):
+        self.template = template
+        self.trunk = trunk
+        self.child = child
+        self.children = children
+        self.horizontal_line = horizontal_line
         self.width = width
-        self.current = 0
+        self.stack = []
 
     def __str__(self):
-        return ' ' * self.current
+        output = [self.trunk_template(num) for num in self.stack[:-1]]
+        output += [self.edge_template(num) for num in self.stack[-1:]]
 
-    def push(self):
-        self.current += self.width
+        return ''.join(output)
+
+    def edge_template(self, num_children):
+        width = self.width - 1
+
+        if num_children == 0:
+            return self.template.format(' ', ' ' * width)
+        elif num_children == 1:
+            return self.template.format(self.child, self.horizontal_line * width)
+        else:
+            return self.template.format(self.children, self.horizontal_line * width)
+
+    def trunk_template(self, num_children):
+        width = self.width - 1
+
+        if num_children == 0:
+            return self.template.format(' ', ' ' * width)
+        else:
+            return self.template.format(self.trunk, ' ' * width)
+
+    def push(self, num_children):
+        self.stack.append(num_children)
 
     def pop(self):
-        self.current = min(self.current - self.width, 0)
+        self.stack.pop()
+
+    def decrement(self):
+        if self.stack[-1] > 0:
+            self.stack[-1] -= 1
 
 
 def printer(func):
@@ -56,63 +95,85 @@ class ParseTreePrinter:
         self.tree = tree
         self.level = IndentLevel()
 
-    def print_line(self, class_name, value):
-        print(self.level, class_name, value)
-
-    def print_token(self, rule_name, token):
-        print(self.level, rule_name, ' ', token.token_type, ' ', token.value, sep='')
-
-    def print_rule(self, name):
-        print(self.level, name, sep='')
-
     def print_tree(self):
-        self.block(self.tree)
+        self.level = IndentLevel()
+        string_tree = self.visit(self.tree)
+        self.level.push(0)
+        self.print_node(string_tree)
 
-    @printer
-    def block(self, value):
-        for statement in value:
-            self.statement(statement)
-
-    @printer
-    def statement(self, value):
-        self.expression(value)
-
-    @printer
-    def expression(self, value):
-        if isinstance(value, BinaryExpression):
-            self.binary_expression(value)
-        elif type(value) is UnaryExpression:
-            self.unary_expression(value)
-        elif type(value) is Function:
-            self.function(value)
+    def print_node(self, node):
+        if isinstance(node[1], list):
+            print(str(self.level), node[0], sep='')
+            self.level.decrement()
+            self.level.push(len(node[1]))
+            for child in node[1]:
+                self.print_node(child)
+            self.level.pop()
         else:
-            self.atom(value)
+            print(str(self.level), node[0], ': ', node[1], sep='')
+            self.level.decrement()
 
-    @printer
-    def binary_expression(self, value):
-        self.expression(value.left)
-        self.print_token('Operator', value.operator)
-        self.expression(value.right)
+    @singledispatchmethod
+    def visit(self, value):
+        raise NotImplementedError('Unknown type')
 
-    @printer
-    def unary_expression(self, value):
-        self.print_token('Operator', value.operator)
+    @visit.register
+    def _(self, token: Token):
+        return token.token_type.name, token.value
 
-    @printer
-    def function(self, value):
-        self.print_token('FunctionDecl', value.definition.name)
+    @visit.register
+    def _(self, value: Block):
+        statements = [self.visit(statement) for statement in value.statements]
+        return 'Block', statements
 
-    @printer
-    def atom(self, value):
-        if type(value) is Float:
-            self.print_token('Float', value.value)
-        elif type(value) is Integer:
-            self.print_token('Integer', value.value)
-        elif type(value) is Boolean:
-            self.print_token('Boolean', value.value)
-        elif type(value) is Identifier:
-            self.print_token('Identifier', value.value)
-        elif type(value) is String:
-            self.print_token('String', value.value)
-        else:
-            self.expression(value)
+    @visit.register
+    def _(self, value: Identifier):
+        return 'Identifier', [self.visit(value.value)]
+
+    @visit.register
+    def _(self, value: Boolean):
+        return 'Boolean', [self.visit(value.value)]
+
+    @visit.register
+    def _(self, value: Integer):
+        return 'Integer', [self.visit(value.value)]
+
+    @visit.register
+    def _(self, value: Float):
+        return 'Float', [self.visit(value.value)]
+
+    @visit.register
+    def _(self, value: String):
+        return 'String', [self.visit(value.value)]
+
+    @visit.register
+    def _(self, value: BinaryExpression):
+        return 'BinaryExpression', [self.visit(value.left), self.visit(value.operator), self.visit(value.right)]
+
+    @visit.register
+    def _(self, value: AssignmentExpression):
+        return 'AssignmentExpression', [self.visit(value.left), self.visit(value.operator), self.visit(value.right)]
+
+    @visit.register
+    def _(self, value: SumExpression):
+        return 'SumExpression', [self.visit(value.left), self.visit(value.operator), self.visit(value.right)]
+
+    @visit.register
+    def _(self, value: ProductExpression):
+        return 'ProductExpression', [self.visit(value.left), self.visit(value.operator), self.visit(value.right)]
+
+    @visit.register
+    def _(self, value: UnaryExpression):
+        return 'UnaryExpression', [self.visit(value.operator), self.visit(value.expression)]
+
+    @visit.register
+    def _(self, value: FunctionDecl):
+        return 'FunctionDecl', [self.visit(value.name), self.visit(value.parameters), self.visit(value.return_type)]
+
+    @visit.register
+    def _(self, value: Function):
+        return 'Function', [self.visit(value.definition), self.visit(value.block)]
+
+    @visit.register
+    def _(self, value: Branch):
+        return 'Branch', [self.visit(value.condition), self.visit(value.then_branch), self.visit(value.else_branch)]

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from dataclasses import dataclass
-from typing import Optional, Sequence, Union
+from typing import List, Optional, Sequence, Union
 
 from .lexer.token import Token
 
@@ -74,6 +74,11 @@ class Statement:
 
 
 @dataclass
+class Block:
+    statements: List[Statement]
+
+
+@dataclass
 class FunctionDecl:
     name: Identifier
     parameters: Sequence[Token]
@@ -83,11 +88,11 @@ class FunctionDecl:
 @dataclass
 class Function:
     definition: FunctionDecl
-    block: Sequence[Statement]
+    block: Block
 
 
 @dataclass
 class Branch:
     condition: Expression
-    then_branch: Sequence[Statement]
-    else_branch: Optional[Union[Sequence[Statement], 'Branch']]
+    then_branch: Block
+    else_branch: Optional[Union[Block, 'Branch']]
