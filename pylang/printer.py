@@ -45,7 +45,8 @@ class IndentLevel:
         self.stack = []
 
     def __str__(self):
-        output = [self.trunk_template(num) for num in self.stack[:-1]]
+        output = []
+        output += [self.trunk_template(num) for num in self.stack[:-1]]
         output += [self.edge_template(num) for num in self.stack[-1:]]
 
         return ''.join(output)
