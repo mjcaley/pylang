@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from dataclasses import dataclass
-from typing import List, Optional, Sequence, Union
+from typing import List, Optional, Union
 
 from .lexer.token import Token
 
@@ -36,6 +36,7 @@ class String(Atom):
     pass
 
 
+@dataclass
 class Expression:
     pass
 
@@ -81,7 +82,7 @@ class Block:
 @dataclass
 class FunctionDecl:
     name: Identifier
-    parameters: Sequence[Token]
+    parameters: List[Token]
     return_type: Optional[Identifier]
 
 

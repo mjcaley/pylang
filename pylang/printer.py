@@ -1,29 +1,8 @@
 #!/usr/bin/env python3
 
 from functools import singledispatchmethod
-from typing import Collection, List
 
 from .parse_tree import *
-
-
-# https://en.wikipedia.org/wiki/Box-drawing_character
-# \u2500 \u256c
-
-# Tree drawing design
-# objects need to mark where a trunk should be written
-# e.g. BinaryExpression needs a trunk to display connections between left, operator and right
-# might need to tell how many children it has?
-# sequence types might be a problem marking the final element, might need to use the length
-#
-# Block
-#  ├──BinaryExpression
-#  │   ├──Left
-#  │   │   └──Integer: 4
-#  │   ├──Operator: Add
-#  │   └──Right
-#  │       └──Integer: 5
-#  └──Last expression
-#
 
 
 class IndentLevel:
