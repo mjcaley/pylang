@@ -76,19 +76,11 @@ class IndentLevel:
         self.stack.pop()
 
     def decrement(self):
-        if self.stack[-1] > 0:
-            self.stack[-1] -= 1
-
-
-def printer(func):
-    def inner(self, *args, **kwargs):
-        self.print_rule(func.__name__)
-        self.level.push()
-        result = func(self, *args, **kwargs)
-        self.level.pop()
-
-        return result
-    return inner
+        try:
+            if self.stack[-1] > 0:
+                self.stack[-1] -= 1
+        except IndexError:
+            pass
 
 
 class ParseTreePrinter:
@@ -99,7 +91,6 @@ class ParseTreePrinter:
     def print_tree(self):
         self.level = IndentLevel()
         string_tree = self.visit(self.tree)
-        self.level.push(0)
         self.print_node(string_tree)
 
     def print_node(self, node):
