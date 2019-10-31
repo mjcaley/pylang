@@ -61,17 +61,18 @@ parser = Lark(r'''
     while_stmt: _WHILE expr _COLON _NL block
     
     // Assignment rules
-    assignment_stmt: expr ASSIGN expr _NL
+    assignment_stmt: expr _assign_op assignment_expr
+    ?assignment_expr: expr _NL | expr _assign_op assignment_expr
+    _assign_op: ASSIGN
+              | PLUS_ASSIGN
+              | MINUS_ASSIGN
+              | MULTIPLY_ASSIGN
+              | DIVIDE_ASSIGN
+              | MODULUS_ASSIGN
+              | EXPONENT_ASSIGN
     
     // Expression rules
     ?expr: or_expr
-    ?assignment_expr: or_expr [ (ASSIGN
-                               | PLUS_ASSIGN
-                               | MINUS_ASSIGN
-                               | MULTIPLY_ASSIGN
-                               | DIVIDE_ASSIGN
-                               | MODULUS_ASSIGN
-                               | EXPONENT_ASSIGN) expr ]
     ?or_expr: and_expr [ _OR expr ]
     ?and_expr: sum_expr [ _AND expr ]
     ?sum_expr: product_expr [ (PLUS | MINUS) expr ]
