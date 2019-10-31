@@ -79,8 +79,9 @@ parser = Lark(r'''
     ?product_expr: exponent_expr [ (MULTIPLY | DIVIDE | MODULUS) expr ]
     ?exponent_expr: unary_expr  [EXPONENT expr]
     ?unary_expr: (NOT | PLUS | MINUS) expr | call_expr
+    
     call_expr: (expr (field_access | call | subscript)) | atom
-    field_access: _DOT expr
+    field_access: _DOT IDENTIFIER
     call: _LPAREN [ expr (_COMMA expr)* ] _RPAREN
     subscript: _LSQUARE expr _RSQUARE
     
