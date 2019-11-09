@@ -73,17 +73,20 @@ parser = Lark(r'''
     
     // Expression rules
     ?expr: or_expr
-    ?or_expr: and_expr [ _OR expr ]
-    ?and_expr: sum_expr [ _AND expr ]
-    ?sum_expr: product_expr [ (PLUS | MINUS) expr ]
-    ?product_expr: exponent_expr [ (MULTIPLY | DIVIDE | MODULUS) expr ]
-    ?exponent_expr: unary_expr  [EXPONENT expr]
-    ?unary_expr: (NOT | PLUS | MINUS) expr | call_expr
+    ?or_expr: or_expr _OR and_expr | and_expr
+    ?and_expr: and_expr _AND sum_expr | sum_expr
+    ?sum_expr: sum_expr (PLUS | MINUS) product_expr | product_expr
+    ?product_expr: product_expr (MULTIPLY | DIVIDE | MODULUS) exponent_expr | exponent_expr
+    ?exponent_expr: exponent_expr EXPONENT unary_expr | unary_expr
+    ?unary_expr: (NOT | PLUS | MINUS) unary_expr | _call_expr
     
-    call_expr: (expr (field_access | call | subscript)) | atom
-    field_access: _DOT IDENTIFIER
-    call: _LPAREN [ expr (_COMMA expr)* ] _RPAREN
-    subscript: _LSQUARE expr _RSQUARE
+    _call_expr: field_access
+              | call 
+              | subscript 
+              | atom
+    field_access: _call_expr _DOT atom
+    call: _call_expr _LPAREN [expr (_COMMA expr)*] _RPAREN 
+    subscript: _call_expr _LSQUARE expr _RSQUARE 
     
     ?atom: _integer
          | _float
@@ -142,6 +145,8 @@ parser = Lark(r'''
         
     _LPAREN: "("
     _RPAREN: ")"
+    _LCALL: "("
+    _RCALL: ")"
     _LBRACE: "{"
     _RBRACE: "}"
     _LSQUARE: "["
@@ -162,3 +167,33 @@ parser = Lark(r'''
     %ignore WS_INLINE
     
 ''', parser='lalr', postlex=TreeIndenter(), debug=True)
+
+parser2 = Lark('''
+?start: expr
+
+?expr: expr ADD expr
+    | expr SUB expr
+    | expr MUL expr
+    | expr DIV expr
+    | expr MOD expr
+    | _LP expr _RP
+    | NEG expr -> unary_expr
+    | expr ASSIGN expr
+    | atom
+
+?atom: INT | "a".."z"
+
+ASSIGN.10: "="
+ADD.1: "+"
+SUB.1: "-"
+MUL.2: "*"
+DIV.2: "/"
+MOD.2: "%"
+_LP.3: "("
+_RP.3: ")"
+NEG.4: "-"
+
+%import common.INT
+%import common.WS_INLINE
+%ignore WS_INLINE
+''', parser='lalr')
