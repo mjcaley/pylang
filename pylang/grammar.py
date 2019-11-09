@@ -61,13 +61,14 @@ parser = Lark(r'''
     
     // Expression rules
     ?expr: assign_expr
-    ?assign_expr: or_expr _assign_op assign_expr | or_expr
+    ?assign_expr: compare_expr _assign_op assign_expr | compare_expr
+    ?compare_expr: compare_expr _compare_op or_expr | or_expr
     ?or_expr: or_expr _OR and_expr | and_expr
     ?and_expr: and_expr _AND sum_expr | sum_expr
     ?sum_expr: sum_expr (PLUS | MINUS) product_expr | product_expr
     ?product_expr: product_expr (MULTIPLY | DIVIDE | MODULUS) exponent_expr | exponent_expr
     ?exponent_expr: exponent_expr EXPONENT unary_expr | unary_expr
-    ?unary_expr: (NOT | PLUS | MINUS) unary_expr | _call_expr
+    ?unary_expr: (NOT | PLUS | MINUS) unary_expr | _call_expr 
     
     _call_expr: field_access
               | call 
@@ -101,6 +102,13 @@ parser = Lark(r'''
               | DIVIDE_ASSIGN
               | MODULUS_ASSIGN
               | EXPONENT_ASSIGN
+              
+    _compare_op: EQUAL
+               | NOT_EQUAL
+               | LESS_THAN
+               | GREATER_THAN
+               | LESS_OR_EQUAL
+               | GREATER_OR_EQUAL
     
     _IMPORT: "import"
     _FUNC: "func"
@@ -138,7 +146,7 @@ parser = Lark(r'''
     LESS_THAN: "<"
     GREATER_THAN: ">"
     LESS_OR_EQUAL: "<="
-    GEATER_OR_EQUAL: ">="
+    GREATER_OR_EQUAL: ">="
         
     _LPAREN: "("
     _RPAREN: ")"
