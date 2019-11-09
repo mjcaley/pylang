@@ -28,7 +28,6 @@ parser = Lark(r'''
              | while_stmt
              | struct_stmt
              | import_stmt
-             | assignment_stmt
              | expr _NL
              
     // Struct rules
@@ -60,19 +59,9 @@ parser = Lark(r'''
     for_stmt: _FOR expr _COLON _NL block
     while_stmt: _WHILE expr _COLON _NL block
     
-    // Assignment rules
-    assignment_stmt: expr _assign_op assignment_expr
-    ?assignment_expr: expr _NL | expr _assign_op assignment_expr
-    _assign_op: ASSIGN
-              | PLUS_ASSIGN
-              | MINUS_ASSIGN
-              | MULTIPLY_ASSIGN
-              | DIVIDE_ASSIGN
-              | MODULUS_ASSIGN
-              | EXPONENT_ASSIGN
-    
     // Expression rules
-    ?expr: or_expr
+    ?expr: assign_expr
+    ?assign_expr: or_expr _assign_op assign_expr | or_expr
     ?or_expr: or_expr _OR and_expr | and_expr
     ?and_expr: and_expr _AND sum_expr | sum_expr
     ?sum_expr: sum_expr (PLUS | MINUS) product_expr | product_expr
@@ -104,6 +93,14 @@ parser = Lark(r'''
     BIN: "0b" "0".."1"+
     OCT: "0o" "0".."7"+
     FLOAT: INTEGER _DOT INTEGER
+    
+    _assign_op: ASSIGN
+              | PLUS_ASSIGN
+              | MINUS_ASSIGN
+              | MULTIPLY_ASSIGN
+              | DIVIDE_ASSIGN
+              | MODULUS_ASSIGN
+              | EXPONENT_ASSIGN
     
     _IMPORT: "import"
     _FUNC: "func"
